@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: dracolich-library-api
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/dracolich-library}
+      auto-index-creation: true
+
+server:
+  port: ${PORT:8080}
+
+logging:
+  level:
+    dm.dracolich: DEBUG
+    org.springframework.data.mongodb: INFO
