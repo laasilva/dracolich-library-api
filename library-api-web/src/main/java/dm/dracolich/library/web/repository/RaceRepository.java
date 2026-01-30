@@ -7,5 +7,5 @@ import reactor.core.publisher.Mono;
 
 @Repository
 public interface RaceRepository extends ReactiveMongoRepository<RaceEntity, String> {
-    Mono<RaceEntity> findByName(String name);
+    Mono<RaceEntity> findByNameIgnoreCase(String name);
 }

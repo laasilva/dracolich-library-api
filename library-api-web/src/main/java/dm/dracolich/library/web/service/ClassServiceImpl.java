@@ -27,13 +27,13 @@ public class ClassServiceImpl implements ClassService {
 
     @Override
     public Mono<ClassResumedRecord> fetchClassByName(String name) {
-        return repo.findByName(name)
+        return repo.findByNameIgnoreCase(name)
                 .map(mapper::entityToResumedRecord);
     }
 
     @Override
     public Mono<ClassDto> fetchClassByNameDetailed(String name) {
-        return repo.findByName(name)
+        return repo.findByNameIgnoreCase(name)
                 .flatMap(this::enrichWithSubclasses);
     }
 
@@ -52,7 +52,7 @@ public class ClassServiceImpl implements ClassService {
     private Mono<ClassDto> enrichWithSubclasses(ClassEntity classEntity) {
         var mapped = mapper.entityToRecord(classEntity);
 
-        return subclassRepo.findAllByClassId(classEntity.getId())
+        return subclassRepo.findAllByClassNameIgnoreCase(classEntity.getName())
                 .map(subclassMapper::entityToRecord)
                 .collectList()
                 .map(subclassesList -> {
