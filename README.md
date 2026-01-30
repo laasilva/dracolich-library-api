@@ -49,6 +49,7 @@ Swagger UI is available at: `http://localhost:8080/dracolich-library/api/v0/swag
 |--------|----------|-------------|
 | `GET` | `/classes/all?includeDetails=true` | Fetch all classes (with subclasses when detailed) |
 | `GET` | `/classes/{name}?includeDetails=true` | Fetch a class by name |
+| `GET` | `/classes/search?name={name}&includeDetails=true` | Search classes by name (partial match) |
 
 **Query Parameters:**
 - `includeDetails` (default: `true`) - When `true`, includes subclasses in the response
@@ -59,17 +60,24 @@ Swagger UI is available at: `http://localhost:8080/dracolich-library/api/v0/swag
 |--------|----------|-------------|
 | `GET` | `/subclasses/class/{className}` | Fetch all subclasses for a given class |
 | `GET` | `/subclasses/{name}` | Fetch a subclass by name |
+| `GET` | `/subclasses/search?name={name}` | Search subclasses by name (partial match) |
 
 #### Spells
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | `/spells/all` | Fetch all spells |
-| `GET` | `/spells/level/{level}` | Fetch spells by spell level (0-9) |
-| `GET` | `/spells/type/{type}` | Fetch spells by type |
-| `GET` | `/spells/name/{name}` | Fetch a spell by name |
+| `GET` | `/spells?name={name}` | Fetch a spell by exact name |
+| `GET` | `/spells/search?name={name}` | Search spells by name (partial match, case-insensitive) |
+| `GET` | `/spells/filter?level={level}&type={type}&school={school}` | Filter spells by level, type, and/or school |
+
+**Query Parameters for `/spells/filter`:**
+- `level` (optional) - Spell level (0-9, where 0 = cantrip)
+- `type` (optional) - Spell type
+- `school` (optional) - Magic school
 
 **Spell Types:** `HEAL`, `ATTACK`, `CONCENTRATION`, `UTILITY`
+
+**Magic Schools:** `ABJURATION`, `CONJURATION`, `DIVINATION`, `ENCHANTMENT`, `EVOCATION`, `ILLUSION`, `NECROMANCY`, `TRANSMUTATION`
 
 ## Data Model
 
@@ -79,7 +87,7 @@ The API provides data for the following game entities:
 - **Subclasses** - 112 subclasses across all classes
 - **Races** - 13 playable races
 - **Subraces** - 31 subraces
-- **Spells** - 464 spells with school, level, and class associations
+- **Spells** - 400+ spells organized by level (cantrips through 8th level) with magic school, spell type, damage scaling, and save types
 - **Equipment** - 436 items including weapons, armor, gear, and magic items
 - **Backgrounds** - 13 character backgrounds
 - **Features** - 114 class features
@@ -104,6 +112,7 @@ The initializer checks if data already exists before seeding, so it only runs on
 Data creation is organized into specialized initializers:
 - `ClassInitializer` - Defines all 12 classes with their features, proficiencies, and level progression
 - `SubclassInitializer` - Defines subclasses organized by parent class
+- `SpellInitializer` - Defines all spells organized by level (cantrips through 9th level) with schools, damage types, and scaling
 - `DataInitializer` - Orchestrates the seeding process and handles other entities
 
 ## Project Structure

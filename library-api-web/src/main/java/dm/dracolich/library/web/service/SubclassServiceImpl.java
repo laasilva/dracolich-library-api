@@ -27,4 +27,10 @@ public class SubclassServiceImpl implements SubclassService {
         return repo.findAllByClassNameIgnoreCase(className)
                 .map(mapper::entityToDto);
     }
+
+    @Override
+    public Flux<SubclassDto> searchSubclassesByName(String name) {
+        return repo.findAllByNameContainingIgnoreCase(name)
+                .map(mapper::entityToDto);
+    }
 }

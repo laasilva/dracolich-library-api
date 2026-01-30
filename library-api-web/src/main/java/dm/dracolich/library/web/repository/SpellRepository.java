@@ -1,15 +1,14 @@
 package dm.dracolich.library.web.repository;
 
-import dm.dracolich.library.dto.enums.SpellTypeEnum;
 import dm.dracolich.library.web.entity.SpellEntity;
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
+import org.springframework.data.repository.query.ReactiveQueryByExampleExecutor;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Repository
-public interface SpellRepository extends ReactiveMongoRepository<SpellEntity, String> {
+public interface SpellRepository extends ReactiveMongoRepository<SpellEntity, String>, ReactiveQueryByExampleExecutor<SpellEntity> {
     Mono<SpellEntity> findByName(String name);
-    Flux<SpellEntity> findByMinSlotLevel(Integer level);
-    Flux<SpellEntity> findBySpellType(SpellTypeEnum spellType);
+    Flux<SpellEntity> findByNameContainingIgnoreCase(String name);
 }

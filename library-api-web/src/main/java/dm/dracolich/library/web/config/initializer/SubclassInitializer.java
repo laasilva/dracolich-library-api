@@ -14,7 +14,7 @@ public class SubclassInitializer {
     public List<SubclassEntity> createSubclasses(Map<String, ClassEntity> classCache) {
         List<SubclassEntity> subclasses = new ArrayList<>();
 
-        // barbarian Subclasses
+        // barbarian
         subclasses.add(SubclassEntity.builder().name("Berserker").description("Fall into your rage entirely to deliver a tide of powerful blows.").className("barbarian").custom(false).build());
         subclasses.add(SubclassEntity.builder().name("Totem Warrior").description("Your rage comes from the animal spirits of the world who aid.").className("barbarian").custom(false).build());
         subclasses.add(SubclassEntity.builder().name("Ancestral Guardian").description("Your rage is the combination of all your ancestors.").className("barbarian").custom(false).build());
@@ -24,7 +24,7 @@ public class SubclassInitializer {
         subclasses.add(SubclassEntity.builder().name("Wild Soul").description("Your rage is strong enough to shatter the walls of magic.").className("barbarian").custom(false).build());
         subclasses.add(SubclassEntity.builder().name("Battlerager").description("Giving yourself over to your rage, make your body a weapon.").className("barbarian").custom(false).build());
 
-        // bard Subclasses
+        // bard
         subclasses.add(SubclassEntity.builder().name("College of Lore").description("A way to keep the stories of history and civilizations alive.").className("bard").custom(false).build());
         subclasses.add(SubclassEntity.builder().name("College of Valor").description("Those that tell vibrant and powerful war stories.").className("bard").custom(false).build());
         subclasses.add(SubclassEntity.builder().name("College of Creation").description("Your music and stories shape the very fabric of reality.").className("bard").custom(false).build());
@@ -34,7 +34,7 @@ public class SubclassInitializer {
         subclasses.add(SubclassEntity.builder().name("College of Eloquence").description("Words have power; use them to shape any situation.").className("bard").custom(false).build());
         subclasses.add(SubclassEntity.builder().name("College of Spirits").description("The dead tell stories and have experiences that you can draw on.").className("bard").custom(false).build());
 
-        // cleric Subclasses
+        // cleric
         subclasses.add(SubclassEntity.builder().name("Knowledge Domain").description("Serve the idea that knowledge is power, and it must endure.").className("cleric").custom(false).build());
         subclasses.add(SubclassEntity.builder().name("Life Domain").description("Serve the idea of life; every life and living thing is a wonder.").className("cleric").custom(false).build());
         subclasses.add(SubclassEntity.builder().name("Light Domain").description("Serve the idea of light; it will burn back the forces of shadow.").className("cleric").custom(false).build());
@@ -50,7 +50,7 @@ public class SubclassInitializer {
         subclasses.add(SubclassEntity.builder().name("Peace Domain").description("Serve the idea of peace; violence is almost never the answer.").className("cleric").custom(false).build());
         subclasses.add(SubclassEntity.builder().name("Arcane Domain").description("Serve the idea of magic; magic is a power and a wonder").className("cleric").custom(false).build());
 
-        // druid Subclasses
+        // druid
         subclasses.add(SubclassEntity.builder().name("Circle of the Land").description("Grown within a certain biome, your power comes from there.").className("druid").custom(false).build());
         subclasses.add(SubclassEntity.builder().name("Circle of the Moon").description("Like a werewolf, your power is based on changing forms.").className("druid").custom(false).build());
         subclasses.add(SubclassEntity.builder().name("Circle of Dreams").description("The Feywild's nature has blessed you with the power to heal.").className("druid").custom(false).build());
@@ -59,7 +59,7 @@ public class SubclassInitializer {
         subclasses.add(SubclassEntity.builder().name("Circle of Stars").description("The answer and guidance can always be found in the stars.").className("druid").custom(false).build());
         subclasses.add(SubclassEntity.builder().name("Circle of Wildfire").description("Wildfires bring about change, ecosystems always revive.").className("druid").custom(false).build());
 
-        // fighter Subclasses
+        // fighter
         subclasses.add(SubclassEntity.builder().name("Champion").description("Hone your martial ability into an incredibly deadly skill with constant crits.").className("fighter").custom(false).build());
         subclasses.add(SubclassEntity.builder().name("Battle Master").description("Use the art of war and tactics to gain advantages and command to victory.").className("fighter").custom(false).build());
         subclasses.add(SubclassEntity.builder().name("Eldritch Knight").description("Learning wizard-like spells to gain the upperhand in any fight.").className("fighter").custom(false).build());
@@ -71,7 +71,7 @@ public class SubclassInitializer {
         subclasses.add(SubclassEntity.builder().name("Echo fighter").description("Using magical energy, create an \"echo\" to fight with you.").className("fighter").custom(false).build());
         subclasses.add(SubclassEntity.builder().name("Purple Dragon Knight").description("A warrior that braves any battle through inspiration.").className("fighter").custom(false).build());
 
-        // monk Subclasses
+        // monk
         subclasses.add(SubclassEntity.builder().name("Way of the Open Hand").description("Use your fists and palms to annihilate your foe.").className("monk").custom(false).build());
         subclasses.add(SubclassEntity.builder().name("Way of the Shadow").description("Usually called, ninjas and so forth. Their fists strike from the shadow.").className("monk").custom(false).build());
         subclasses.add(SubclassEntity.builder().name("Way of the Four Elements").description("Control all 4 elements, earth, water, fire and wind in your ways.").className("monk").custom(false).build());
@@ -83,7 +83,7 @@ public class SubclassInitializer {
         subclasses.add(SubclassEntity.builder().name("Way of the Long Death").description("Your soul and fists become the tools of death.").className("monk").custom(false).build());
         subclasses.add(SubclassEntity.builder().name("Way of the Ascendant Dragon").description("Following the way of dragons, your spirit manifests their power.").className("monk").custom(false).build());
 
-        // Paladin Subclasses
+        // Paladin
         subclasses.add(SubclassEntity.builder().name("Oath of Devotion").description("Light, Lawful, Honesty, the pure holy warrior.").className("paladin").custom(false).build());
         subclasses.add(SubclassEntity.builder().name("Oath of the Ancients").description("Joy and love, the ancients blessed this warrior with nature.").className("paladin").custom(false).build());
         subclasses.add(SubclassEntity.builder().name("Oath of Vengeance").description("Anger and vengeance, something bad pushed this warrior to seek vengeance.").className("paladin").custom(false).build());
@@ -94,7 +94,7 @@ public class SubclassInitializer {
         subclasses.add(SubclassEntity.builder().name("Oath of the Watchers").description("A warrior sworn to fight anything supernatural.").className("paladin").custom(false).build());
         subclasses.add(SubclassEntity.builder().name("Oath of the Crown").description("A warrior that serves a crown or kingdom.").className("paladin").custom(false).build());
 
-        // ranger Subclasses
+        // ranger
         subclasses.add(SubclassEntity.builder().name("Fey Wanderer").description("With the power of fey on their side, these rangers charm their foes.").className("ranger").custom(false).build());
         subclasses.add(SubclassEntity.builder().name("Swarmkeeper").description("Insects, pixies or a similar swarm creature. These rangers take care of them.").className("ranger").custom(false).build());
         subclasses.add(SubclassEntity.builder().name("Gloom Stalker").description("These hunters wander in the shadows to defeat creatures of the night.").className("ranger").custom(false).build());
@@ -104,7 +104,7 @@ public class SubclassInitializer {
         subclasses.add(SubclassEntity.builder().name("Beast Master").description("A warrior who has gained the assistance of a spiritual beast.").className("ranger").custom(false).build());
         subclasses.add(SubclassEntity.builder().name("Drakewarden").description("A warrior who has gained the assistance of a powerful drake that follows them.").className("ranger").custom(false).build());
 
-        // rogue Subclasses
+        // rogue
         subclasses.add(SubclassEntity.builder().name("Thief").description("Thieves are rogues who are experts at breaking into things and stealing.").className("rogue").custom(false).build());
         subclasses.add(SubclassEntity.builder().name("Assassin").description("Assassins are masters at killing while unseen.").className("rogue").custom(false).build());
         subclasses.add(SubclassEntity.builder().name("Arcane Trickster").description("Tricksters mix magic into their skills, enhancing them.").className("rogue").custom(false).build());
@@ -115,7 +115,7 @@ public class SubclassInitializer {
         subclasses.add(SubclassEntity.builder().name("Phantom").description("Shadow magic is within the hearts of these rogues, stealing souls.").className("rogue").custom(false).build());
         subclasses.add(SubclassEntity.builder().name("Soulknife").description("Blessed with a psychic mind, their roguish skills are enhanced.").className("rogue").custom(false).build());
 
-        // sorcerer Subclasses
+        // sorcerer
         subclasses.add(SubclassEntity.builder().name("Aberrant Mind").description("Cursed or blessed with a powerful psychic mind, their magic comes from their head.").className("sorcerer").custom(false).build());
         subclasses.add(SubclassEntity.builder().name("Clockwork Soul").description("The balance of the universe flows through their veins.").className("sorcerer").custom(false).build());
         subclasses.add(SubclassEntity.builder().name("Divine Soul").description("With blood from something Divine, gods watch them with interest.").className("sorcerer").custom(false).build());
@@ -124,7 +124,7 @@ public class SubclassInitializer {
         subclasses.add(SubclassEntity.builder().name("Draconic Bloodline").description("With the ancestors of dragons, they show draconic natures.").className("sorcerer").custom(false).build());
         subclasses.add(SubclassEntity.builder().name("Wild Magic").description("The chaos of the universe flows through their veins.").className("sorcerer").custom(false).build());
 
-        // warlock Subclasses
+        // warlock
         subclasses.add(SubclassEntity.builder().name("The Archfey").description("A magical pact with an Archfey of the feywild.").className("warlock").custom(false).build());
         subclasses.add(SubclassEntity.builder().name("The Fiend").description("A magical pact with a demonic or devilish entity.").className("warlock").custom(false).build());
         subclasses.add(SubclassEntity.builder().name("The Great Old One").description("An ancient and powerful unknown entity from worlds beyond.").className("warlock").custom(false).build());
@@ -135,7 +135,7 @@ public class SubclassInitializer {
         subclasses.add(SubclassEntity.builder().name("The Genie").description("A magical pact with a powerful elemental.").className("warlock").custom(false).build());
         subclasses.add(SubclassEntity.builder().name("The Undead").description("A magical pact with a powerful deathless being that defies the cycle.").className("warlock").custom(false).build());
 
-        // wizard Subclasses
+        // wizard
         subclasses.add(SubclassEntity.builder().name("School of Abjuration").description("Study the defensive powers of magic.").className("wizard").custom(false).build());
         subclasses.add(SubclassEntity.builder().name("School of Conjuration").description("Study the ways to control the creatures you summon.").className("wizard").custom(false).build());
         subclasses.add(SubclassEntity.builder().name("School of Divination").description("Study the ways magic can show you the future and past.").className("wizard").custom(false).build());

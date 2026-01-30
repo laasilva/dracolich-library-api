@@ -49,6 +49,18 @@ public class ClassServiceImpl implements ClassService {
                 .flatMap(this::enrichWithSubclasses);
     }
 
+    @Override
+    public Flux<ClassResumedRecord> searchClassesByName(String name) {
+        return repo.findAllByClassNameIgnoreCase(name)
+                .map(mapper::entityToResumedRecord);
+    }
+
+    @Override
+    public Flux<ClassDto> searchClassesByNameDetailed(String name) {
+        return repo.findAllByClassNameIgnoreCase(name)
+                .flatMap(this::enrichWithSubclasses);
+    }
+
     private Mono<ClassDto> enrichWithSubclasses(ClassEntity classEntity) {
         var mapped = mapper.entityToDto(classEntity);
 

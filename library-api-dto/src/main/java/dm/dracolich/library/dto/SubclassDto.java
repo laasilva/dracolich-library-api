@@ -9,10 +9,10 @@ import java.util.Set;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class SubclassDto {
     private String name;
     private String description;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Set<AttributeDto> subclassAttributes;
     private boolean custom;
 }

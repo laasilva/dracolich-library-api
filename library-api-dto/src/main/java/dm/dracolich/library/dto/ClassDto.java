@@ -1,6 +1,7 @@
 package dm.dracolich.library.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import dm.dracolich.library.dto.enums.*;
 import lombok.*;
 
@@ -11,6 +12,7 @@ import java.util.Set;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ClassDto {
     @JsonIgnore
     private String id;

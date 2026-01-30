@@ -10,4 +10,6 @@ public interface ClassService {
     Mono<ClassDto> fetchClassByNameDetailed(String name);
     Flux<ClassResumedRecord> fetchAllClasses();
     Flux<ClassDto> fetchAllClassesDetailed();
+    Flux<ClassResumedRecord> searchClassesByName(String name);
+    Flux<ClassDto> searchClassesByNameDetailed(String name);
 }

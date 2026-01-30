@@ -9,6 +9,7 @@ import dm.dracolich.library.web.config.initializer.SpellInitializer;
 import dm.dracolich.library.web.config.initializer.SubclassInitializer;
 import dm.dracolich.library.web.entity.*;
 import dm.dracolich.library.web.repository.*;
+import dm.dracolich.library.web.repository.SpellRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;

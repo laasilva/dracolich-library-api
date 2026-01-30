@@ -34,6 +34,7 @@ public class SpellInitializer {
     }
 
     // ==================== CANTRIPS ====================
+
     private List<SpellEntity> createCantrips() {
         return List.of(
             // CONJURATION
@@ -184,6 +185,7 @@ public class SpellInitializer {
     }
 
     // ==================== LEVEL 2 SPELLS ====================
+
     private List<SpellEntity> createLevel2Spells() {
         return List.of(
                 // EVOCATION
@@ -275,6 +277,7 @@ public class SpellInitializer {
     }
 
     // ==================== LEVEL 3 SPELLS ====================
+
     private List<SpellEntity> createLevel3Spells() {
         return List.of(
                 // EVOCATION - Attack spells with slot scaling
@@ -510,6 +513,7 @@ public class SpellInitializer {
     }
 
     // ==================== LEVEL 4 SPELLS ====================
+
     private List<SpellEntity> createLevel4Spells() {
         return List.of(
                 // ABJURATION
@@ -573,6 +577,7 @@ public class SpellInitializer {
     }
 
     // ==================== LEVEL 5 SPELLS ====================
+
     private List<SpellEntity> createLevel5Spells() {
         return List.of(
                 // ABJURATION
@@ -652,6 +657,7 @@ public class SpellInitializer {
     }
 
     // ==================== LEVEL 6 SPELLS ====================
+
     private List<SpellEntity> createLevel6Spells() {
         return List.of(
                 // ABJURATION
@@ -717,6 +723,7 @@ public class SpellInitializer {
     }
 
     // ==================== LEVEL 7 SPELLS ====================
+
     private List<SpellEntity> createLevel7Spells() {
         return List.of(
                 // ABJURATION
@@ -728,9 +735,6 @@ public class SpellInitializer {
                 SpellEntity.builder().name("Mordenkainen's Magnificent Mansion").schoolType(SchoolTypeEnum.CONJURATION).description("You conjure an extradimensional dwelling in range that lasts for the duration. You choose where its one entrance is located. The entrance shimmers faintly.").minSlotLevel(7).castingTime(1).range(300).duration(24).spellType(SpellTypeEnum.UTILITY).build(),
                 SpellEntity.builder().name("Plane Shift").schoolType(SchoolTypeEnum.CONJURATION).description("You and up to eight willing creatures who link hands in a circle are transported to a different plane of existence.").minSlotLevel(7).castingTime(1).range(0).duration(0).spellType(SpellTypeEnum.UTILITY).save(AbilityTypeEnum.CHARISMA).build(),
                 SpellEntity.builder().name("Teleport").schoolType(SchoolTypeEnum.CONJURATION).description("This spell instantly transports you and up to eight willing creatures of your choice that you can see within range to a destination you select.").minSlotLevel(7).castingTime(1).range(10).duration(0).spellType(SpellTypeEnum.UTILITY).build(),
-
-                // DIVINATION
-                // (No common Level 7 divination spells in standard sources)
 
                 // ENCHANTMENT
                 SpellEntity.builder().name("Power Word Pain").schoolType(SchoolTypeEnum.ENCHANTMENT).description("You speak a word of power that causes waves of intense pain to assail one creature you can see within range. If the target has 100 hit points or fewer, it is subject to crippling pain.").minSlotLevel(7).castingTime(1).range(60).duration(0).spellType(SpellTypeEnum.UTILITY).build(),
@@ -765,6 +769,7 @@ public class SpellInitializer {
     }
 
     // ==================== LEVEL 8 SPELLS ====================
+
     private List<SpellEntity> createLevel8Spells() {
         return List.of(
                 // ABJURATION

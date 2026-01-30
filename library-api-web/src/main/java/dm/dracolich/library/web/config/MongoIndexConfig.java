@@ -33,8 +33,8 @@ public class MongoIndexConfig {
         // Unique index on subclass name
         createIndexSafe(SubclassEntity.class, new Index().on("name", Sort.Direction.ASC).unique(), "subclasses.name");
 
-        // Index on subclass classId for lookups
-        createIndexSafe(SubclassEntity.class, new Index().on("classId", Sort.Direction.ASC), "subclasses.classId");
+        // Index on subclass className for lookups
+        createIndexSafe(SubclassEntity.class, new Index().on("className", Sort.Direction.ASC), "subclasses.classId");
 
         // Unique index on alignment name
         createIndexSafe(AlignmentEntity.class, new Index().on("name", Sort.Direction.ASC).unique(), "alignments.name");

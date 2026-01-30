@@ -43,5 +43,15 @@ public class SubclassController {
         return service.fetchSubclassByName(name);
     }
 
+    @Operation(summary = "Search Subclasses by name", description = "Returns subclasses by search results")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Subclasses fetched successfully",
+                    content = @Content(schema = @Schema(implementation = ClassDto.class)))
+    })
+    @GetMapping(path = {"/search"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<SubclassDto> searchSubclassesByName(@RequestParam String name) {
+        return service.searchSubclassesByName(name);
+    }
+
 
 }

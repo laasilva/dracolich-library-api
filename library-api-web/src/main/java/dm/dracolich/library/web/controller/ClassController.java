@@ -47,4 +47,20 @@ public class ClassController {
 
         return service.fetchClassByName(name);
     }
+
+    @Operation(summary = "Search classes by name", description = "Returns classes that match name")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Classes fetched successfully",
+                    content = @Content(schema = @Schema(implementation = ClassDto.class)))
+    })
+    @GetMapping(path = {"/search"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<?> searchClassesByName(@RequestParam String name,
+                                       @RequestParam(defaultValue = "true") boolean includeDetails) {
+        if(includeDetails)
+            return service.searchClassesByNameDetailed(name);
+
+        return service.searchClassesByName(name);
+    }
+
+
 }

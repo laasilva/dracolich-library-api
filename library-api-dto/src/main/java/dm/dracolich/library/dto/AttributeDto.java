@@ -12,10 +12,10 @@ import java.util.Map;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class AttributeDto {
     private String id;
     private String name;
     private String description;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Map<AbilityTypeEnum, Integer> abilityBonus;
 }
