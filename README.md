@@ -79,6 +79,35 @@ Swagger UI is available at: `http://localhost:8080/dracolich-library/api/v0/swag
 
 **Magic Schools:** `ABJURATION`, `CONJURATION`, `DIVINATION`, `ENCHANTMENT`, `EVOCATION`, `ILLUSION`, `NECROMANCY`, `TRANSMUTATION`
 
+**Example Requests:**
+```bash
+# Get all evocation spells
+GET /spells/filter?school=EVOCATION
+
+# Get all 3rd level attack spells
+GET /spells/filter?level=3&type=ATTACK
+
+# Search for spells containing "fire"
+GET /spells/search?name=fire
+```
+
+### Spell Response Model
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `name` | string | Spell name |
+| `description` | string | Full spell description |
+| `schoolType` | enum | Magic school (Evocation, Abjuration, etc.) |
+| `minSlotLevel` | integer | Minimum spell slot level (0 = cantrip) |
+| `castingTime` | integer | Casting time in actions |
+| `range` | integer | Range in feet (0 = self/touch) |
+| `duration` | integer | Duration in hours (0 = instantaneous) |
+| `spellType` | enum | Spell category (Attack, Heal, etc.) |
+| `save` | enum | Required saving throw ability |
+| `damageTypes` | array | Damage types dealt by the spell |
+| `diceType` | enum | Dice used for damage/healing |
+| `valueAtSlotLevel` | object | Damage/effect scaling per slot level |
+
 ## Data Model
 
 The API provides data for the following game entities:
@@ -114,6 +143,17 @@ Data creation is organized into specialized initializers:
 - `SubclassInitializer` - Defines subclasses organized by parent class
 - `SpellInitializer` - Defines all spells organized by level (cantrips through 9th level) with schools, damage types, and scaling
 - `DataInitializer` - Orchestrates the seeding process and handles other entities
+
+## Enum Reference
+
+### Damage Types
+`FIRE`, `ACID`, `BLUDGEONING`, `COLD`, `FORCE`, `LIGHTNING`, `NECROTIC`, `PIERCING`, `POISON`, `PSYCHIC`, `RADIANT`, `SLASHING`, `THUNDER`
+
+### Ability Scores (for saving throws)
+`STRENGTH`, `DEXTERITY`, `CONSTITUTION`, `INTELLIGENCE`, `WISDOM`, `CHARISMA`
+
+### Dice Types
+`D4`, `D6`, `D8`, `D10`, `D12`, `D20`
 
 ## Project Structure
 

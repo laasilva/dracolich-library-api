@@ -13,6 +13,7 @@ import java.util.Set;
 public class SubclassDto {
     private String name;
     private String description;
+    private String className;
     private Set<AttributeDto> subclassAttributes;
     private boolean custom;
 }
