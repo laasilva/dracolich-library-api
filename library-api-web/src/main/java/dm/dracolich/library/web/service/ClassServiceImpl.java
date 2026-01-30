@@ -8,12 +8,14 @@ import dm.dracolich.library.web.mapper.SubclassMapper;
 import dm.dracolich.library.web.repository.ClassRepository;
 import dm.dracolich.library.web.repository.SubclassRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.HashSet;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ClassServiceImpl implements ClassService {
