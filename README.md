@@ -1,6 +1,6 @@
 # Dracolich Library API
 
-A reactive REST API for D&D 5e game data, built with Spring Boot WebFlux and MongoDB. This API serves as a comprehensive reference library for classes, subclasses, races, spells, equipment, and other game elements.
+A reactive REST API for D&D game data, built with Spring Boot WebFlux and MongoDB. This API serves as a comprehensive reference library for classes, subclasses, races, spells, equipment, and other game elements.
 
 ## Tech Stack
 
@@ -62,7 +62,7 @@ Swagger UI is available at: `http://localhost:8080/dracolich-library/api/v0/swag
 
 ## Data Model
 
-The API provides data for the following D&D 5e entities:
+The API provides data for the following game entities:
 
 - **Classes** - All 12 base classes with level progression, proficiencies, and starting equipment
 - **Subclasses** - 112 subclasses across all classes
@@ -77,7 +77,7 @@ The API provides data for the following D&D 5e entities:
 
 ## Data Initialization
 
-On first startup, the application automatically seeds the database with D&D 5e reference data. This includes:
+On first startup, the application automatically seeds the database with reference data. This includes:
 
 1. **Attributes** - Ability scores (STR, DEX, CON, INT, WIS, CHA) and all skills
 2. **Races & Subraces** - Core races with their variants
