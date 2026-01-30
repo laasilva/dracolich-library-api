@@ -1,6 +1,6 @@
 package dm.dracolich.library.web.entity;
 
-import dm.dracolich.library.dto.Proficiency;
+import dm.dracolich.library.dto.ProficiencyDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,5 +20,5 @@ public class TraitEntity {
     private String id;
     private String name;
     private String description;
-    private Set<Proficiency> proficiencies; // optional
+    private Set<ProficiencyDto> proficiencies; // optional
 }

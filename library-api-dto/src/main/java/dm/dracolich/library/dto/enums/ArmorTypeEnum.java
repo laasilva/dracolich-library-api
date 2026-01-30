@@ -4,5 +4,6 @@ public enum ArmorTypeEnum {
     NOT_PROFICIENT,
     LIGHT,
     MEDIUM,
-    HEAVY
+    HEAVY,
+    SHIELDS
 }

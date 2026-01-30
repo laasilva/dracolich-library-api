@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.core.index.Index;
+import reactor.core.publisher.Mono;
 
 @Configuration
 @RequiredArgsConstructor
@@ -21,61 +22,56 @@ public class MongoIndexConfig {
         log.info("Creating MongoDB indexes...");
 
         // Unique index on attribute name
-        mongoTemplate.indexOps(AttributeEntity.class).createIndex(new Index().on("name", Sort.Direction.ASC).unique())
-                .subscribe(result -> log.debug("Created index on attributes.name: {}", result));
+        createIndexSafe(AttributeEntity.class, new Index().on("name", Sort.Direction.ASC).unique(), "attributes.name");
 
         // Unique index on race name
-        mongoTemplate.indexOps(RaceEntity.class).createIndex(new Index().on("name", Sort.Direction.ASC).unique())
-                .subscribe(result -> log.debug("Created index on races.name: {}", result));
+        createIndexSafe(RaceEntity.class, new Index().on("name", Sort.Direction.ASC).unique(), "races.name");
 
         // Unique index on class name
-        mongoTemplate.indexOps(ClassEntity.class).createIndex(new Index().on("name", Sort.Direction.ASC).unique())
-                .subscribe(result -> log.debug("Created index on classes.name: {}", result));
+        createIndexSafe(ClassEntity.class, new Index().on("name", Sort.Direction.ASC).unique(), "classes.name");
 
         // Unique index on subclass name
-        mongoTemplate.indexOps(SubclassEntity.class).createIndex(new Index().on("name", Sort.Direction.ASC).unique())
-                .subscribe(result -> log.debug("Created index on subclasses.name: {}", result));
+        createIndexSafe(SubclassEntity.class, new Index().on("name", Sort.Direction.ASC).unique(), "subclasses.name");
 
         // Index on subclass classId for lookups
-        mongoTemplate.indexOps(SubclassEntity.class).createIndex(new Index().on("classId", Sort.Direction.ASC))
-                .subscribe(result -> log.debug("Created index on subclasses.classId: {}", result));
+        createIndexSafe(SubclassEntity.class, new Index().on("classId", Sort.Direction.ASC), "subclasses.classId");
 
         // Unique index on alignment name
-        mongoTemplate.indexOps(AlignmentEntity.class).createIndex(new Index().on("name", Sort.Direction.ASC).unique())
-                .subscribe(result -> log.debug("Created index on alignments.name: {}", result));
+        createIndexSafe(AlignmentEntity.class, new Index().on("name", Sort.Direction.ASC).unique(), "alignments.name");
 
         // Unique index on background name
-        mongoTemplate.indexOps(BackgroundEntity.class).createIndex(new Index().on("name", Sort.Direction.ASC).unique())
-                .subscribe(result -> log.debug("Created index on backgrounds.name: {}", result));
+        createIndexSafe(BackgroundEntity.class, new Index().on("name", Sort.Direction.ASC).unique(), "backgrounds.name");
 
         // Unique index on feature name
-        mongoTemplate.indexOps(FeatureEntity.class).createIndex(new Index().on("name", Sort.Direction.ASC).unique())
-                .subscribe(result -> log.debug("Created index on features.name: {}", result));
+        createIndexSafe(FeatureEntity.class, new Index().on("name", Sort.Direction.ASC).unique(), "features.name");
 
         // Unique index on subrace name
-        mongoTemplate.indexOps(SubraceEntity.class).createIndex(new Index().on("name", Sort.Direction.ASC).unique())
-                .subscribe(result -> log.debug("Created index on subraces.name: {}", result));
+        createIndexSafe(SubraceEntity.class, new Index().on("name", Sort.Direction.ASC).unique(), "subraces.name");
 
         // Index on subrace raceId for lookups
-        mongoTemplate.indexOps(SubraceEntity.class).createIndex(new Index().on("raceId", Sort.Direction.ASC))
-                .subscribe(result -> log.debug("Created index on subraces.raceId: {}", result));
+        createIndexSafe(SubraceEntity.class, new Index().on("raceId", Sort.Direction.ASC), "subraces.raceId");
 
         // Unique index on spell name
-        mongoTemplate.indexOps(SpellEntity.class).createIndex(new Index().on("name", Sort.Direction.ASC).unique())
-                .subscribe(result -> log.debug("Created index on spells.name: {}", result));
+        createIndexSafe(SpellEntity.class, new Index().on("name", Sort.Direction.ASC).unique(), "spells.name");
 
         // Index on spell level for lookups
-        mongoTemplate.indexOps(SpellEntity.class).createIndex(new Index().on("minSlotLevel", Sort.Direction.ASC))
-                .subscribe(result -> log.debug("Created index on spells.minSlotLevel: {}", result));
+        createIndexSafe(SpellEntity.class, new Index().on("minSlotLevel", Sort.Direction.ASC), "spells.minSlotLevel");
 
         // Unique index on equipment name
-        mongoTemplate.indexOps(EquipmentEntity.class).createIndex(new Index().on("name", Sort.Direction.ASC).unique())
-                .subscribe(result -> log.debug("Created index on equipment.name: {}", result));
+        createIndexSafe(EquipmentEntity.class, new Index().on("name", Sort.Direction.ASC).unique(), "equipment.name");
 
         // Index on equipment category for lookups
-        mongoTemplate.indexOps(EquipmentEntity.class).createIndex(new Index().on("equipmentCategory", Sort.Direction.ASC))
-                .subscribe(result -> log.debug("Created index on equipment.equipmentCategory: {}", result));
+        createIndexSafe(EquipmentEntity.class, new Index().on("equipmentCategory", Sort.Direction.ASC), "equipment.equipmentCategory");
 
         log.info("MongoDB indexes creation initiated");
+    }
+
+    private void createIndexSafe(Class<?> entityClass, Index index, String indexDescription) {
+        mongoTemplate.indexOps(entityClass).createIndex(index)
+                .onErrorResume(e -> {
+                    log.debug("Index {} already exists or conflict: {}", indexDescription, e.getMessage());
+                    return Mono.empty();
+                })
+                .subscribe(result -> log.debug("Created index on {}: {}", indexDescription, result));
     }
 }

@@ -9,5 +9,5 @@ import reactor.core.publisher.Mono;
 @Repository
 public interface SubclassRepository extends ReactiveMongoRepository<SubclassEntity, String> {
     Mono<SubclassEntity> findByName(String name);
-    Flux<SubclassEntity> findByClassId(String classId);
+    Flux<SubclassEntity> findAllByClassId(String classId);
 }

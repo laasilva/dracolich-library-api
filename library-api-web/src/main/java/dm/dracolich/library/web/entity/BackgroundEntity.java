@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "backgrounds")
@@ -15,7 +16,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class BackgroundEntity {
     @Id
     private String id;
+    @Indexed(unique = true)
     private String name;
     private String description;
-    private FeatureEntity feature;
+    private String featureId;  // reference to FeatureEntity
+    private boolean custom;
 }

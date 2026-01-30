@@ -4,9 +4,10 @@ import dm.dracolich.library.dto.enums.AbilityTypeEnum;
 import dm.dracolich.library.dto.enums.AttackTypeEnum;
 import dm.dracolich.library.dto.enums.CoinEnum;
 import dm.dracolich.library.dto.enums.DamageTypeEnum;
-import dm.dracolich.library.dto.enums.DiceTypeEnum;
 import dm.dracolich.library.dto.enums.EquipmentCategoryEnum;
 import dm.dracolich.library.dto.enums.SpellTypeEnum;
+import dm.dracolich.library.web.config.initializer.ClassInitializer;
+import dm.dracolich.library.web.config.initializer.SubclassInitializer;
 import dm.dracolich.library.web.entity.*;
 import dm.dracolich.library.web.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -23,10 +24,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class DataInitializer {
-
+    private final ClassInitializer classInitializer;
+    private final SubclassInitializer subclassInitializer;
     private final AttributeRepository attributeRepository;
     private final RaceRepository raceRepository;
-    private final ClassRepository classRepository;
     private final SubclassRepository subclassRepository;
     private final AlignmentRepository alignmentRepository;
     private final BackgroundRepository backgroundRepository;
@@ -34,10 +35,11 @@ public class DataInitializer {
     private final SubraceRepository subraceRepository;
     private final SpellRepository spellRepository;
     private final EquipmentRepository equipmentRepository;
+    private final ClassRepository classRepository;
 
-    private Map<String, AttributeEntity> attributeCache = new HashMap<>();
-    private Map<String, RaceEntity> raceCache = new HashMap<>();
-    private Map<String, ClassEntity> classCache = new HashMap<>();
+    private final Map<String, ClassEntity> classCache = new HashMap<>();
+    private final Map<String, AttributeEntity> attributeCache = new HashMap<>();
+    private final Map<String, RaceEntity> raceCache = new HashMap<>();
 
     @EventListener(ApplicationReadyEvent.class)
     public void initializeData() {
@@ -47,27 +49,27 @@ public class DataInitializer {
                 .flatMap(count -> {
                     if (count > 0) {
                         log.info("Database already contains data, skipping initialization");
-                        return Mono.empty();
+                        return Mono.just("skipped");
                     }
-                    return seedAllData();
+                    return seedAllData().thenReturn("completed");
                 })
                 .subscribe(
-                        result -> log.info("Database initialization completed successfully"),
+                        result -> log.info("Database initialization {}", result),
                         error -> log.error("Database initialization failed", error)
                 );
     }
 
     private Mono<Void> seedAllData() {
         return seedAttributes()
-                .then(seedRaces())
-                .then(seedClasses())
-                .then(seedSubclasses())
-                .then(seedAlignments())
-                .then(seedBackgrounds())
-                .then(seedFeatures())
-                .then(seedSubraces())
-                .then(seedSpells())
-                .then(seedEquipment())
+                .then(Mono.defer(this::seedRaces))
+                .then(Mono.defer(this::seedClasses))
+                .then(Mono.defer(this::seedSubclasses))
+                .then(Mono.defer(this::seedAlignments))
+                .then(Mono.defer(this::seedBackgrounds))
+                .then(Mono.defer(this::seedFeatures))
+                .then(Mono.defer(this::seedSubraces))
+                .then(Mono.defer(this::seedSpells))
+                .then(Mono.defer(this::seedEquipment))
                 .then(Mono.fromRunnable(() -> log.info("All seed data inserted successfully")));
     }
 
@@ -89,9 +91,9 @@ public class DataInitializer {
                 .doOnSuccess(v -> log.info("Seeded {} races", races.size()));
     }
 
-    private Mono<Void> seedClasses() {
+    public Mono<Void> seedClasses() {
         log.info("Seeding classes...");
-        List<ClassEntity> classes = createClasses();
+        List<ClassEntity> classes = classInitializer.createClasses();
         return classRepository.saveAll(classes)
                 .doOnNext(cls -> classCache.put(cls.getName(), cls))
                 .then()
@@ -100,7 +102,7 @@ public class DataInitializer {
 
     private Mono<Void> seedSubclasses() {
         log.info("Seeding subclasses...");
-        List<SubclassEntity> subclasses = createSubclasses();
+        List<SubclassEntity> subclasses = subclassInitializer.createSubclasses(classCache);
         return subclassRepository.saveAll(subclasses)
                 .then()
                 .doOnSuccess(v -> log.info("Seeded {} subclasses", subclasses.size()));
@@ -123,8 +125,8 @@ public class DataInitializer {
     }
 
     private Mono<Void> seedFeatures() {
-        log.info("Seeding features (feats)...");
-        List<FeatureEntity> features = createFeatures();
+        log.info("Seeding features...");
+        List<FeatureEntity> features = classInitializer.createAllFeatures();
         return featureRepository.saveAll(features)
                 .then()
                 .doOnSuccess(v -> log.info("Seeded {} features", features.size()));
@@ -143,82 +145,307 @@ public class DataInitializer {
         List<AttributeEntity> attributes = new ArrayList<>();
 
         // Race Attributes
-        attributes.add(AttributeEntity.builder().name("Celestial Resistance").build());
-        attributes.add(AttributeEntity.builder().name("Darkvision").build());
-        attributes.add(AttributeEntity.builder().name("Healing Hands").build());
-        attributes.add(AttributeEntity.builder().name("Light Bearer").build());
-        attributes.add(AttributeEntity.builder().name("Celestial Revelation").build());
-        attributes.add(AttributeEntity.builder().name("Dragon Ancestry").build());
-        attributes.add(AttributeEntity.builder().name("Breath Weapon").build());
-        attributes.add(AttributeEntity.builder().name("Damage Resistance").build());
-        attributes.add(AttributeEntity.builder().name("Flight").build());
-        attributes.add(AttributeEntity.builder().name("Dwarven Resilience").build());
-        attributes.add(AttributeEntity.builder().name("Dwarven Toughness").build());
-        attributes.add(AttributeEntity.builder().name("Stonecunning").build());
-        attributes.add(AttributeEntity.builder().name("Elven Lineage").build());
-        attributes.add(AttributeEntity.builder().name("Fey Ancestry").build());
-        attributes.add(AttributeEntity.builder().name("Keen Senses").build());
-        attributes.add(AttributeEntity.builder().name("Trance").build());
-        attributes.add(AttributeEntity.builder().name("Gnomish Cunning").build());
-        attributes.add(AttributeEntity.builder().name("Gnomish Lineage").build());
-        attributes.add(AttributeEntity.builder().name("Giant Ancestry").build());
-        attributes.add(AttributeEntity.builder().name("Large Form").build());
-        attributes.add(AttributeEntity.builder().name("Powerful Build").build());
-        attributes.add(AttributeEntity.builder().name("Brave").build());
-        attributes.add(AttributeEntity.builder().name("Halfling Nimbleness").build());
-        attributes.add(AttributeEntity.builder().name("Luck").build());
-        attributes.add(AttributeEntity.builder().name("Stealthy").build());
-        attributes.add(AttributeEntity.builder().name("Resourceful").build());
-        attributes.add(AttributeEntity.builder().name("Skillful").build());
-        attributes.add(AttributeEntity.builder().name("Versatile").build());
-        attributes.add(AttributeEntity.builder().name("Adrenaline Rush").build());
-        attributes.add(AttributeEntity.builder().name("Relentless").build());
-        attributes.add(AttributeEntity.builder().name("Endurance").build());
-        attributes.add(AttributeEntity.builder().name("Fiendish Legacy").build());
-        attributes.add(AttributeEntity.builder().name("Presence").build());
-        attributes.add(AttributeEntity.builder().name("Vampiric Bite").build());
-        attributes.add(AttributeEntity.builder().name("Fire Resistance").build());
-        attributes.add(AttributeEntity.builder().name("Cold Resistance").build());
-        attributes.add(AttributeEntity.builder().name("Misty Step").build());
-        attributes.add(AttributeEntity.builder().name("Astral Knowledge").build());
-        attributes.add(AttributeEntity.builder().name("Psychic Resistance").build());
+        attributes.add(AttributeEntity.builder()
+                .name("Celestial Resistance")
+                .description("You have resistance to necrotic and radiant damage.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Darkvision")
+                .description("You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Healing Hands")
+                .description("As an action, you can touch a creature and roll a number of d4s equal to your proficiency bonus. The creature regains hit points equal to the total rolled.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Light Bearer")
+                .description("You know the Light cantrip. Charisma is your spellcasting ability for it.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Celestial Revelation")
+                .description("You can manifest celestial features. Choose one: Heavenly Wings, Inner Radiance, or Necrotic Shroud.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Dragon Ancestry")
+                .description("You have draconic ancestry. Choose one type of dragon from the table. Your breath weapon and damage resistance are determined by the dragon type.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Breath Weapon")
+                .description("You can use your action to exhale destructive energy. Your draconic ancestry determines the size, shape, and damage type of the exhalation.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Damage Resistance")
+                .description("You have resistance to the damage type associated with your draconic ancestry.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Flight")
+                .description("You have a flying speed equal to your walking speed. You can't use this flying speed if you're wearing medium or heavy armor.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Dwarven Resilience")
+                .description("You have advantage on saving throws against poison, and you have resistance against poison damage.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Dwarven Toughness")
+                .description("Your hit point maximum increases by 1, and it increases by 1 every time you gain a level.")
+                .abilityBonus(Map.of(AbilityTypeEnum.CONSTITUTION, 1))
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Stonecunning")
+                .description("Whenever you make an Intelligence (History) check related to the origin of stonework, you are considered proficient and add double your proficiency bonus.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Elven Lineage")
+                .description("You are part of a lineage that grants you supernatural abilities. Choose High Elf, Wood Elf, or Dark Elf lineage.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Fey Ancestry")
+                .description("You have advantage on saving throws against being charmed, and magic can't put you to sleep.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Keen Senses")
+                .description("You have proficiency in the Perception skill.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Trance")
+                .description("Elves don't need to sleep. Instead, they meditate deeply for 4 hours a day, gaining the same benefit that a human does from 8 hours of sleep.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Gnomish Cunning")
+                .description("You have advantage on Intelligence, Wisdom, and Charisma saving throws against magic.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Gnomish Lineage")
+                .description("You are part of a lineage that grants you supernatural abilities. Choose Forest Gnome or Rock Gnome lineage.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Giant Ancestry")
+                .description("You are descended from Giants. You gain the ability to use certain giant-related abilities based on your subrace.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Large Form")
+                .description("Starting at 5th level, you can change your size to Large as a bonus action. This lasts for 10 minutes or until you end it as a bonus action.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Powerful Build")
+                .description("You count as one size larger when determining your carrying capacity and the weight you can push, drag, or lift.")
+                .abilityBonus(Map.of(AbilityTypeEnum.STRENGTH, 1))
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Brave")
+                .description("You have advantage on saving throws against being frightened.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Halfling Nimbleness")
+                .description("You can move through the space of any creature that is of a size larger than yours.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Luck")
+                .description("When you roll a 1 on the d20 for an attack roll, ability check, or saving throw, you can reroll the die and must use the new roll.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Stealthy")
+                .description("You have proficiency in the Stealth skill.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Resourceful")
+                .description("You gain Heroic Inspiration whenever you finish a long rest.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Skillful")
+                .description("You gain proficiency in one skill of your choice.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Versatile")
+                .description("You gain an Origin feat of your choice.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Adrenaline Rush")
+                .description("You can take the Dash action as a bonus action. When you do, you gain temporary hit points equal to your proficiency bonus.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Relentless")
+                .description("When you are reduced to 0 hit points but not killed outright, you can drop to 1 hit point instead. You can't use this feature again until you finish a long rest.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Endurance")
+                .description("You have proficiency in the Survival skill, and you have advantage on Constitution saving throws against exhaustion.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Fiendish Legacy")
+                .description("You are the recipient of a fiendish legacy that grants you supernatural abilities. Choose Abyssal, Chthonic, or Infernal legacy.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Presence")
+                .description("You have proficiency in one of the following skills of your choice: Deception, Intimidation, or Persuasion.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Vampiric Bite")
+                .description("Your fanged bite is a natural weapon, which counts as a simple melee weapon. You can use it to make unarmed strikes dealing 1d4 piercing damage + Constitution modifier.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Fire Resistance")
+                .description("You have resistance to fire damage.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Cold Resistance")
+                .description("You have resistance to cold damage.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Misty Step")
+                .description("You can cast Misty Step without expending a spell slot. You can use this ability a number of times equal to your proficiency bonus, regaining all uses after a long rest.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Astral Knowledge")
+                .description("You can mystically access a reservoir of experiences of entities connected to the Astral Plane. You gain proficiency in one skill of your choice.")
+                .abilityBonus(Map.of(AbilityTypeEnum.INTELLIGENCE, 1))
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Psychic Resistance")
+                .description("You have resistance to psychic damage.")
+                .build());
 
         // Class Features
-        attributes.add(AttributeEntity.builder().name("Magical Tinkering").build());
-        attributes.add(AttributeEntity.builder().name("Infuse Item").build());
-        attributes.add(AttributeEntity.builder().name("Rage").build());
-        attributes.add(AttributeEntity.builder().name("Unarmored Defense").build());
-        attributes.add(AttributeEntity.builder().name("Reckless Attack").build());
-        attributes.add(AttributeEntity.builder().name("Bardic Inspiration").build());
-        attributes.add(AttributeEntity.builder().name("Jack of All Trades").build());
-        attributes.add(AttributeEntity.builder().name("Song of Rest").build());
-        attributes.add(AttributeEntity.builder().name("Spellcasting").build());
-        attributes.add(AttributeEntity.builder().name("Channel Divinity").build());
-        attributes.add(AttributeEntity.builder().name("Divine Intervention").build());
-        attributes.add(AttributeEntity.builder().name("Wild Shape").build());
-        attributes.add(AttributeEntity.builder().name("Fighting Style").build());
-        attributes.add(AttributeEntity.builder().name("Second Wind").build());
-        attributes.add(AttributeEntity.builder().name("Action Surge").build());
-        attributes.add(AttributeEntity.builder().name("Extra Attack").build());
-        attributes.add(AttributeEntity.builder().name("Martial Arts").build());
-        attributes.add(AttributeEntity.builder().name("Ki").build());
-        attributes.add(AttributeEntity.builder().name("Deflect Missiles").build());
-        attributes.add(AttributeEntity.builder().name("Divine Sense").build());
-        attributes.add(AttributeEntity.builder().name("Lay on Hands").build());
-        attributes.add(AttributeEntity.builder().name("Divine Smite").build());
-        attributes.add(AttributeEntity.builder().name("Favored Enemy").build());
-        attributes.add(AttributeEntity.builder().name("Natural Explorer").build());
-        attributes.add(AttributeEntity.builder().name("Primeval Awareness").build());
-        attributes.add(AttributeEntity.builder().name("Sneak Attack").build());
-        attributes.add(AttributeEntity.builder().name("Thieves Cant").build());
-        attributes.add(AttributeEntity.builder().name("Cunning Action").build());
-        attributes.add(AttributeEntity.builder().name("Evasion").build());
-        attributes.add(AttributeEntity.builder().name("Sorcery Points").build());
-        attributes.add(AttributeEntity.builder().name("Metamagic").build());
-        attributes.add(AttributeEntity.builder().name("Eldritch Invocations").build());
-        attributes.add(AttributeEntity.builder().name("Pact Boon").build());
-        attributes.add(AttributeEntity.builder().name("Arcane Recovery").build());
-        attributes.add(AttributeEntity.builder().name("Spell Mastery").build());
+        attributes.add(AttributeEntity.builder()
+                .name("Magical Tinkering")
+                .description("You've learned how to invest a spark of magic into mundane objects. You can touch a Tiny nonmagical object and imbue it with one magical property.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Infuse Item")
+                .description("You've gained the ability to imbue mundane items with certain magical infusions, turning them into magic items.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Rage")
+                .description("In battle, you fight with primal ferocity. On your turn, you can enter a rage as a bonus action, granting advantage on Strength checks and saving throws, bonus rage damage, and resistance to bludgeoning, piercing, and slashing damage.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Unarmored Defense")
+                .description("While you are not wearing any armor, your Armor Class equals 10 + your Dexterity modifier + your Constitution modifier (Barbarian) or Wisdom modifier (Monk).")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Reckless Attack")
+                .description("You can throw aside all concern for defense to attack with fierce desperation. When you make your first attack on your turn, you can decide to attack recklessly, giving you advantage on melee weapon attack rolls but giving attack rolls against you advantage until your next turn.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Bardic Inspiration")
+                .description("You can inspire others through stirring words or music. A creature within 60 feet that can hear you gains a Bardic Inspiration die to add to one ability check, attack roll, or saving throw.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Jack of All Trades")
+                .description("You can add half your proficiency bonus, rounded down, to any ability check you make that doesn't already include your proficiency bonus.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Song of Rest")
+                .description("You can use soothing music or oration to help revitalize your wounded allies during a short rest. Creatures that regain hit points by spending Hit Dice gain extra healing.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Spellcasting")
+                .description("You have learned to cast spells through study, devotion, or innate ability. You have a pool of spell slots that you use to cast your spells.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Channel Divinity")
+                .description("You gain the ability to channel divine energy directly from your deity, using that energy to fuel magical effects. You start with two such effects: Turn Undead and an effect determined by your domain.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Divine Intervention")
+                .description("You can call on your deity to intervene on your behalf when your need is great. Imploring your deity's aid requires you to use your action.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Wild Shape")
+                .description("You can use your action to magically assume the shape of a beast that you have seen before. You can use this feature twice and regain expended uses when you finish a short or long rest.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Fighting Style")
+                .description("You adopt a particular style of fighting as your specialty. Choose one Fighting Style option such as Archery, Defense, Dueling, or Great Weapon Fighting.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Second Wind")
+                .description("You have a limited well of stamina that you can draw on to protect yourself from harm. On your turn, you can use a bonus action to regain hit points equal to 1d10 + your fighter level.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Action Surge")
+                .description("You can push yourself beyond your normal limits for a moment. On your turn, you can take one additional action.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Extra Attack")
+                .description("You can attack twice, instead of once, whenever you take the Attack action on your turn.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Martial Arts")
+                .description("Your practice of martial arts gives you mastery of combat styles that use unarmed strikes and monk weapons. You gain benefits while unarmed or wielding only monk weapons.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Ki")
+                .description("Your training allows you to harness the mystic energy of ki. You have a number of ki points equal to your monk level that you can spend on various ki features.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Deflect Missiles")
+                .description("You can use your reaction to deflect or catch the missile when you are hit by a ranged weapon attack. You reduce the damage by 1d10 + your Dexterity modifier + your monk level.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Divine Sense")
+                .description("The presence of strong evil registers on your senses like a noxious odor, and powerful good rings like heavenly music in your ears. You can detect celestials, fiends, and undead within 60 feet.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Lay on Hands")
+                .description("Your blessed touch can heal wounds. You have a pool of healing power that replenishes when you take a long rest. You can restore a total number of hit points equal to your paladin level × 5.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Divine Smite")
+                .description("When you hit a creature with a melee weapon attack, you can expend one spell slot to deal radiant damage to the target, in addition to the weapon's damage.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Favored Enemy")
+                .description("You have significant experience studying, tracking, hunting, and even talking to a certain type of enemy. Choose a type of favored enemy. You have advantage on Survival checks to track them and Intelligence checks to recall information about them.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Natural Explorer")
+                .description("You are particularly familiar with one type of natural environment and are adept at traveling and surviving in such regions. Choose one type of favored terrain.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Primeval Awareness")
+                .description("You can use your action and expend one ranger spell slot to focus your awareness on the region around you. You sense whether certain creature types are present within 1 mile (or 6 miles in favored terrain).")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Sneak Attack")
+                .description("You know how to strike subtly and exploit a foe's distraction. Once per turn, you can deal extra damage to one creature you hit with an attack if you have advantage or an ally is within 5 feet of the target.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Thieves Cant")
+                .description("During your rogue training you learned thieves' cant, a secret mix of dialect, jargon, and code that allows you to hide messages in seemingly normal conversation.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Cunning Action")
+                .description("You can take a bonus action on each of your turns in combat to take the Dash, Disengage, or Hide action.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Evasion")
+                .description("When you are subjected to an effect that allows you to make a Dexterity saving throw to take only half damage, you instead take no damage on a success and only half damage on a failure.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Sorcery Points")
+                .description("You have a pool of sorcery points that you can use to create spell slots, fuel Metamagic options, and power other sorcerer abilities.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Metamagic")
+                .description("You gain the ability to twist your spells to suit your needs. You gain Metamagic options like Careful Spell, Distant Spell, Empowered Spell, Extended Spell, Quickened Spell, Subtle Spell, and Twinned Spell.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Eldritch Invocations")
+                .description("In your study of occult lore, you have unearthed eldritch invocations, fragments of forbidden knowledge that imbue you with an abiding magical ability.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Pact Boon")
+                .description("Your otherworldly patron bestows a gift upon you for your loyal service. You gain one of the following features: Pact of the Blade, Pact of the Chain, or Pact of the Tome.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Arcane Recovery")
+                .description("You have learned to regain some of your magical energy by studying your spellbook. Once per day when you finish a short rest, you can recover spell slots with a combined level equal to or less than half your wizard level.")
+                .build());
+        attributes.add(AttributeEntity.builder()
+                .name("Spell Mastery")
+                .description("You have achieved such mastery over certain spells that you can cast them at will. Choose a 1st-level wizard spell and a 2nd-level wizard spell. You can cast those spells at their lowest level without expending a spell slot.")
+                .build());
 
         return attributes;
     }
@@ -351,264 +578,6 @@ public class DataInitializer {
         );
     }
 
-    // ==================== CLASS CREATION ====================
-    private List<ClassEntity> createClasses() {
-        return List.of(
-                ClassEntity.builder()
-                        .name("Artificer")
-                        .description("Artificers are powerful magic wielders who are experts at creating and forging magic items and potions to assist their allies or bring doom to their foes.")
-                        .classAttributes(getAttributeSet("Magical Tinkering", "Infuse Item", "Spellcasting"))
-                        .hitDice(DiceTypeEnum.D8)
-                        .custom(false)
-                        .build(),
-
-                ClassEntity.builder()
-                        .name("Barbarian")
-                        .description("Barbarians are powerful warriors whose strength comes from their rage. Able to use their anger as a weapon. The subclass represents different paths they walk, which teaches them special ways to use their anger.")
-                        .classAttributes(getAttributeSet("Rage", "Unarmored Defense", "Reckless Attack", "Extra Attack"))
-                        .hitDice(DiceTypeEnum.D12)
-                        .custom(false)
-                        .build(),
-
-                ClassEntity.builder()
-                        .name("Bard")
-                        .description("A poet, a singer, a storyteller. There are those that seek to bring wonder to the world, and their magic comes from their emotions from the stories they tell and the songs they sing. Bards have different colleges that they follow to hone their skills in magic.")
-                        .classAttributes(getAttributeSet("Bardic Inspiration", "Jack of All Trades", "Song of Rest", "Spellcasting"))
-                        .hitDice(DiceTypeEnum.D8)
-                        .custom(false)
-                        .build(),
-
-                ClassEntity.builder()
-                        .name("Cleric")
-                        .description("Ideas are not just a simple blueprint for a machine or an urge to buy new farming equipment. Ideas are immortal things that can topple empires and bring justice to those that threaten others. Ideas are some of the most powerful forces in the universe. All it needs is a champion, and clerics are those champions. Usually following a pantheon or a god/goddess, they devote their lives to serving that idea.")
-                        .classAttributes(getAttributeSet("Spellcasting", "Channel Divinity", "Divine Intervention"))
-                        .hitDice(DiceTypeEnum.D8)
-                        .custom(false)
-                        .build(),
-
-                ClassEntity.builder()
-                        .name("Druid")
-                        .description("Druids are protectors of nature. They are the embodiment of it's wrath and it's beauty. They have the ability to shapeshift into creatures and special skills, based on which circle they follow which is a further representation of different parts of nature.")
-                        .classAttributes(getAttributeSet("Spellcasting", "Wild Shape"))
-                        .hitDice(DiceTypeEnum.D8)
-                        .custom(false)
-                        .build(),
-
-                ClassEntity.builder()
-                        .name("Fighter")
-                        .description("Swordsman ship, spears, shields, bows and crossbows. All these bring about images of fighters. Warriors who hone their combative ability to a deadly skill that rivals none. Some use magic to enhance their ability, while others crush magic in favor of pure muscle or acrobatic skills.")
-                        .classAttributes(getAttributeSet("Fighting Style", "Second Wind", "Action Surge", "Extra Attack"))
-                        .hitDice(DiceTypeEnum.D10)
-                        .custom(false)
-                        .build(),
-
-                ClassEntity.builder()
-                        .name("Monk")
-                        .description("Kung Fu, Karate, Drunken Fighting, Dr. Strange, ect. All of these are what the D&D Monks train in. Whether it's using your fist, spirit, ki or weapons that are nothing but an extension of your will. Monks can deliver a storm of powerful melee attacks.")
-                        .classAttributes(getAttributeSet("Martial Arts", "Ki", "Unarmored Defense", "Deflect Missiles", "Extra Attack"))
-                        .hitDice(DiceTypeEnum.D8)
-                        .custom(false)
-                        .build(),
-
-                ClassEntity.builder()
-                        .name("Paladin")
-                        .description("Paladins, much like clerics, hold up ideas. However, they serve tenants with a multitude of ideas. Some of joy, others of light and conquest. Paladin holds an Oath which is the representation of said ideas.")
-                        .classAttributes(getAttributeSet("Divine Sense", "Lay on Hands", "Fighting Style", "Spellcasting", "Divine Smite", "Extra Attack"))
-                        .hitDice(DiceTypeEnum.D10)
-                        .custom(false)
-                        .build(),
-
-                ClassEntity.builder()
-                        .name("Ranger")
-                        .description("Rangers are those that wander and live within the wild. Their skill to survive in harsh nature places is bested by none. Many rangers take on a role, usually in various ways to hunt special types of monsters.")
-                        .classAttributes(getAttributeSet("Favored Enemy", "Natural Explorer", "Fighting Style", "Spellcasting", "Primeval Awareness", "Extra Attack"))
-                        .hitDice(DiceTypeEnum.D10)
-                        .custom(false)
-                        .build(),
-
-                ClassEntity.builder()
-                        .name("Rogue")
-                        .description("Rogues are talented individuals who hone skills of the unethical or criminal. A rogue's skill in thieving, killing, etc. is rivaled by none as they become experts in their field.")
-                        .classAttributes(getAttributeSet("Sneak Attack", "Thieves Cant", "Cunning Action", "Evasion"))
-                        .hitDice(DiceTypeEnum.D8)
-                        .custom(false)
-                        .build(),
-
-                ClassEntity.builder()
-                        .name("Sorcerer")
-                        .description("Usually born with magical energy running through their veins. Sorcerers are what people usually think of when the image of a \"spellslinger\" comes to mind. Their magical force is linked to their emotions and mind.")
-                        .classAttributes(getAttributeSet("Spellcasting", "Sorcery Points", "Metamagic"))
-                        .hitDice(DiceTypeEnum.D6)
-                        .custom(false)
-                        .build(),
-
-                ClassEntity.builder()
-                        .name("Warlock")
-                        .description("With the dark stereotype of being evil, warlocks are feared. Usually, these are mortals who have signed a magical contract with immortal entities where the entity will gift them magical power for the price of servitude.")
-                        .classAttributes(getAttributeSet("Spellcasting", "Eldritch Invocations", "Pact Boon"))
-                        .hitDice(DiceTypeEnum.D8)
-                        .custom(false)
-                        .build(),
-
-                ClassEntity.builder()
-                        .name("Wizard")
-                        .description("Wizards are considered the Apex of the Arcane and spend a lot of their life in education and schooling. With their massive knowledge of magic, they know exactly how to shape magical forces to do what they desire. Most of the time, wizards tend to walk down a school of magic to master in.")
-                        .classAttributes(getAttributeSet("Spellcasting", "Arcane Recovery", "Spell Mastery"))
-                        .hitDice(DiceTypeEnum.D6)
-                        .custom(false)
-                        .build()
-        );
-    }
-
-    // ==================== SUBCLASS CREATION ====================
-    private List<SubclassEntity> createSubclasses() {
-        List<SubclassEntity> subclasses = new ArrayList<>();
-
-        // Artificer Subclasses
-        subclasses.add(SubclassEntity.builder().name("Armorer").description("Fuse powerful magic with your armor to create exoskeleton suits").classId(getClassId("Artificer")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Alchemist").description("A master of potion-making to heal, assist and destroy").classId(getClassId("Artificer")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Artillerist").description("Control the battlefield by summoning powerful magic cannons.").classId(getClassId("Artificer")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Battle Smith").description("Creating magical machines that fight and protect others.").classId(getClassId("Artificer")).custom(false).build());
-
-        // Barbarian Subclasses
-        subclasses.add(SubclassEntity.builder().name("Berserker").description("Fall into your rage entirely to deliver a tide of powerful blows.").classId(getClassId("Barbarian")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Totem Warrior").description("Your rage comes from the animal spirits of the world who aid.").classId(getClassId("Barbarian")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Ancestral Guardian").description("Your rage is the combination of all your ancestors.").classId(getClassId("Barbarian")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Storm Herald").description("Your rage is second only to that of mother nature, who joins you.").classId(getClassId("Barbarian")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Zealot").description("The rage acts as a gift from the gods. You are their champion.").classId(getClassId("Barbarian")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Beast").description("Gifts from the beasts of this world as you manifest their power.").classId(getClassId("Barbarian")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Wild Soul").description("Your rage is strong enough to shatter the walls of magic.").classId(getClassId("Barbarian")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Battlerager").description("Giving yourself over to your rage, make your body a weapon.").classId(getClassId("Barbarian")).custom(false).build());
-
-        // Bard Subclasses
-        subclasses.add(SubclassEntity.builder().name("College of Lore").description("A way to keep the stories of history and civilizations alive.").classId(getClassId("Bard")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("College of Valor").description("Those that tell vibrant and powerful war stories.").classId(getClassId("Bard")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("College of Creation").description("Your music and stories shape the very fabric of reality.").classId(getClassId("Bard")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("College of Glamor").description("Blessed by the Feywild, your looks are rivaled by none.").classId(getClassId("Bard")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("College of Swords").description("Become the best and most elegant sword fighter in the world.").classId(getClassId("Bard")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("College of Whispers").description("The hypnotic power of bards can be used for stealth.").classId(getClassId("Bard")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("College of Eloquence").description("Words have power; use them to shape any situation.").classId(getClassId("Bard")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("College of Spirits").description("The dead tell stories and have experiences that you can draw on.").classId(getClassId("Bard")).custom(false).build());
-
-        // Cleric Subclasses
-        subclasses.add(SubclassEntity.builder().name("Knowledge Domain").description("Serve the idea that knowledge is power, and it must endure.").classId(getClassId("Cleric")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Life Domain").description("Serve the idea of life; every life and living thing is a wonder.").classId(getClassId("Cleric")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Light Domain").description("Serve the idea of light; it will burn back the forces of shadow.").classId(getClassId("Cleric")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Nature Domain").description("Serve the idea of nature; the natural world can't ever fall.").classId(getClassId("Cleric")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Tempest Domain").description("Serve the idea of change, storms are powerful and resistant").classId(getClassId("Cleric")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Trickery Domain").description("Serve the idea of deception, pranks, or more keeps the world moving").classId(getClassId("Cleric")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("War Domain").description("Serve the idea of war, whether it's war for honor or power.").classId(getClassId("Cleric")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Death Domain").description("Serve the idea of death; everything must eventually end.").classId(getClassId("Cleric")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Twilight Domain").description("Serve the idea of balance; those that attempt to disrupt it must be stopped.").classId(getClassId("Cleric")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Order Domain").description("Serve the idea of order and law; you are the voice of justice.").classId(getClassId("Cleric")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Forge Domain").description("Serve the idea of creation; the forges you touch will never fail").classId(getClassId("Cleric")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Grave Domain").description("Serve the idea of life and death; the balance must be maintained").classId(getClassId("Cleric")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Peace Domain").description("Serve the idea of peace; violence is almost never the answer.").classId(getClassId("Cleric")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Arcane Domain").description("Serve the idea of magic; magic is a power and a wonder").classId(getClassId("Cleric")).custom(false).build());
-
-        // Druid Subclasses
-        subclasses.add(SubclassEntity.builder().name("Circle of the Land").description("Grown within a certain biome, your power comes from there.").classId(getClassId("Druid")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Circle of the Moon").description("Like a werewolf, your power is based on changing forms.").classId(getClassId("Druid")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Circle of Dreams").description("The Feywild's nature has blessed you with the power to heal.").classId(getClassId("Druid")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Circle of Shepherd").description("Like a shepherd, you protect the animals of the world.").classId(getClassId("Druid")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Circle of Spores").description("Mycelium has many uses and abilities, including raising the dead.").classId(getClassId("Druid")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Circle of Stars").description("The answer and guidance can always be found in the stars.").classId(getClassId("Druid")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Circle of Wildfire").description("Wildfires bring about change, ecosystems always revive.").classId(getClassId("Druid")).custom(false).build());
-
-        // Fighter Subclasses
-        subclasses.add(SubclassEntity.builder().name("Champion").description("Hone your martial ability into an incredibly deadly skill with constant crits.").classId(getClassId("Fighter")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Battle Master").description("Use the art of war and tactics to gain advantages and command to victory.").classId(getClassId("Fighter")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Eldritch Knight").description("Learning wizard-like spells to gain the upperhand in any fight.").classId(getClassId("Fighter")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Arcane Archer").description("Mix magic with your arrows to rain literal fire down upon your foes.").classId(getClassId("Fighter")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Cavalier").description("You will never break; your skill, while mounted or not, can not be beaten.").classId(getClassId("Fighter")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Samurai").description("Your fighting spirit will allow you to rain a hurricane of deadly blows.").classId(getClassId("Fighter")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Psi Warrior").description("Blessed with psychic energy, your mind is sharpened just like your weapon.").classId(getClassId("Fighter")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Rune Knight").description("Learn the ancient power of Giants and their powerful magic runes.").classId(getClassId("Fighter")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Echo Fighter").description("Using magical energy, create an \"echo\" to fight with you.").classId(getClassId("Fighter")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Purple Dragon Knight").description("A warrior that braves any battle through inspiration.").classId(getClassId("Fighter")).custom(false).build());
-
-        // Monk Subclasses
-        subclasses.add(SubclassEntity.builder().name("Way of the Open Hand").description("Use your fists and palms to annihilate your foe.").classId(getClassId("Monk")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Way of the Shadow").description("Usually called, ninjas and so forth. Their fists strike from the shadow.").classId(getClassId("Monk")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Way of the Four Elements").description("Control all 4 elements, earth, water, fire and wind in your ways.").classId(getClassId("Monk")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Way of Mercy").description("Your ki and spirit is meant to heal wounds, not create them.").classId(getClassId("Monk")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Way of the Astral Self").description("Your spirit becomes an entity around you to help you.").classId(getClassId("Monk")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Way of the Drunken Master").description("Confuse your foes with unpredictable attacks.").classId(getClassId("Monk")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Way of the Kensei").description("Your weapons become an extension of yourself. A form of art.").classId(getClassId("Monk")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Way of the Sun Soul").description("Your soul and will is so powerful that it can ignite in fire.").classId(getClassId("Monk")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Way of the Long Death").description("Your soul and fists become the tools of death.").classId(getClassId("Monk")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Way of the Ascendant Dragon").description("Following the way of dragons, your spirit manifests their power.").classId(getClassId("Monk")).custom(false).build());
-
-        // Paladin Subclasses
-        subclasses.add(SubclassEntity.builder().name("Oath of Devotion").description("Light, Lawful, Honesty, the pure holy warrior.").classId(getClassId("Paladin")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Oath of the Ancients").description("Joy and love, the ancients blessed this warrior with nature.").classId(getClassId("Paladin")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Oath of Vengeance").description("Anger and vengeance, something bad pushed this warrior to seek vengeance.").classId(getClassId("Paladin")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Oathbreaker").description("They broke an oath long ago and are cursed for it.").classId(getClassId("Paladin")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Oath of Conquest").description("Destruction and Victory, nothing will stop this warrior.").classId(getClassId("Paladin")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Oath of Redemption").description("A warrior that uses words instead of the sword.").classId(getClassId("Paladin")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Oath of Glory").description("A warrior that is destined for glory, fight for your destiny.").classId(getClassId("Paladin")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Oath of the Watchers").description("A warrior sworn to fight anything supernatural.").classId(getClassId("Paladin")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Oath of the Crown").description("A warrior that serves a crown or kingdom.").classId(getClassId("Paladin")).custom(false).build());
-
-        // Ranger Subclasses
-        subclasses.add(SubclassEntity.builder().name("Fey Wanderer").description("With the power of fey on their side, these rangers charm their foes.").classId(getClassId("Ranger")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Swarmkeeper").description("Insects, pixies or a similar swarm creature. These rangers take care of them.").classId(getClassId("Ranger")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Gloom Stalker").description("These hunters wander in the shadows to defeat creatures of the night.").classId(getClassId("Ranger")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Horizon Walker").description("These hunters seek out creatures from other worlds to end them.").classId(getClassId("Ranger")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Monster Slayer").description("These warriors hunt down to slay powerful monsters.").classId(getClassId("Ranger")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Hunter").description("A warrior who hones different parts of their fighting style to hunt.").classId(getClassId("Ranger")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Beast Master").description("A warrior who has gained the assistance of a spiritual beast.").classId(getClassId("Ranger")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Drakewarden").description("A warrior who has gained the assistance of a powerful drake that follows them.").classId(getClassId("Ranger")).custom(false).build());
-
-        // Rogue Subclasses
-        subclasses.add(SubclassEntity.builder().name("Thief").description("Thieves are rogues who are experts at breaking into things and stealing.").classId(getClassId("Rogue")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Assassin").description("Assassins are masters at killing while unseen.").classId(getClassId("Rogue")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Arcane Trickster").description("Tricksters mix magic into their skills, enhancing them.").classId(getClassId("Rogue")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Inquisitive").description("Like a detective, inquisitive rogues watch their targets and use their patterns.").classId(getClassId("Rogue")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Mastermind").description("These rogues are deadly smart, using their intelligence to fight.").classId(getClassId("Rogue")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Scout").description("Ambushing and Stealthing with speed, these rogues are always ahead.").classId(getClassId("Rogue")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Swashbuckler").description("Rogues that are fast and light on their feet, impossible to pin.").classId(getClassId("Rogue")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Phantom").description("Shadow magic is within the hearts of these rogues, stealing souls.").classId(getClassId("Rogue")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Soulknife").description("Blessed with a psychic mind, their roguish skills are enhanced.").classId(getClassId("Rogue")).custom(false).build());
-
-        // Sorcerer Subclasses
-        subclasses.add(SubclassEntity.builder().name("Aberrant Mind").description("Cursed or blessed with a powerful psychic mind, their magic comes from their head.").classId(getClassId("Sorcerer")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Clockwork Soul").description("The balance of the universe flows through their veins.").classId(getClassId("Sorcerer")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Divine Soul").description("With blood from something Divine, gods watch them with interest.").classId(getClassId("Sorcerer")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Shadow Magic").description("Cursed with shadow magic, their power manipulates the shadows.").classId(getClassId("Sorcerer")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Storm Sorcery").description("With the blood of a powerful hurricane, storms are a comfort.").classId(getClassId("Sorcerer")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Draconic Bloodline").description("With the ancestors of dragons, they show draconic natures.").classId(getClassId("Sorcerer")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Wild Magic").description("The chaos of the universe flows through their veins.").classId(getClassId("Sorcerer")).custom(false).build());
-
-        // Warlock Subclasses
-        subclasses.add(SubclassEntity.builder().name("The Archfey").description("A magical pact with an Archfey of the feywild.").classId(getClassId("Warlock")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("The Fiend").description("A magical pact with a demonic or devilish entity.").classId(getClassId("Warlock")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("The Great Old One").description("An ancient and powerful unknown entity from worlds beyond.").classId(getClassId("Warlock")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("The Celestial").description("A magical pact with an entity of good, law, and order.").classId(getClassId("Warlock")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Undying").description("A magical pact with an entity that represents the dead.").classId(getClassId("Warlock")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("The Hexblade").description("A magical pact with an entity that is or gifted a powerful weapon.").classId(getClassId("Warlock")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("The Fathomless").description("A magical pact with a creature of the world's deep oceans.").classId(getClassId("Warlock")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("The Genie").description("A magical pact with a powerful elemental.").classId(getClassId("Warlock")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("The Undead").description("A magical pact with a powerful deathless being that defies the cycle.").classId(getClassId("Warlock")).custom(false).build());
-
-        // Wizard Subclasses
-        subclasses.add(SubclassEntity.builder().name("School of Abjuration").description("Study the defensive powers of magic.").classId(getClassId("Wizard")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("School of Conjuration").description("Study the ways to control the creatures you summon.").classId(getClassId("Wizard")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("School of Divination").description("Study the ways magic can show you the future and past.").classId(getClassId("Wizard")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("School of Enchantment").description("Study the ways that magic can bend the minds of others.").classId(getClassId("Wizard")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("School of Evocation").description("Study the ways that magic can destroy and offense.").classId(getClassId("Wizard")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("School of Illusion").description("Study the ways that magic can make the eyes of others lie.").classId(getClassId("Wizard")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("School of Necromancy").description("Study the forces of life and death.").classId(getClassId("Wizard")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("School of Transmutation").description("Study the ways magic can shift reality.").classId(getClassId("Wizard")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("School of Graviturgy").description("Study the ways magic can shift and manipulate gravity.").classId(getClassId("Wizard")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("School of Chronurgy").description("Study the ways magic can shift and bend time itself.").classId(getClassId("Wizard")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("War Magic").description("Study the ways magic can be used in combat and how it can be stored.").classId(getClassId("Wizard")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Bladesinging").description("Study a tradition of wizardry that incorporates swordplay and dance.").classId(getClassId("Wizard")).custom(false).build());
-        subclasses.add(SubclassEntity.builder().name("Order of Scribes").description("Study the ways magic can be enhanced through books of power.").classId(getClassId("Wizard")).custom(false).build());
-
-        return subclasses;
-    }
-
     // ==================== ALIGNMENT CREATION ====================
     private List<AlignmentEntity> createAlignments() {
         return List.of(
@@ -627,126 +596,20 @@ public class DataInitializer {
     // ==================== BACKGROUND CREATION ====================
     private List<BackgroundEntity> createBackgrounds() {
         return List.of(
-                BackgroundEntity.builder().name("Acolyte").description("You have spent your life in service to a temple, learning sacred rites and providing sacrifices to the gods.").build(),
-                BackgroundEntity.builder().name("Artisan").description("You began mopping floors and scrubbing counters in an artisan's workshop while you were still young enough to be sent to bed without supper.").build(),
-                BackgroundEntity.builder().name("Carouser").description("You have spent your life in the pursuit of good times, making friends and finding excitement wherever you go.").build(),
-                BackgroundEntity.builder().name("Charlatan").description("You have always had a way with people. You know what makes them tick, and with a few well-chosen words you can make them believe anything.").build(),
-                BackgroundEntity.builder().name("Criminal").description("You are an experienced criminal with a history of breaking the law. You have spent a lot of time among other criminals.").build(),
-                BackgroundEntity.builder().name("Entertainer").description("You thrive in front of an audience. You know how to entrance them, entertain them, and even inspire them.").build(),
-                BackgroundEntity.builder().name("Farmer").description("You have spent your life working the land, planting seeds, and harvesting crops. The rhythm of the seasons is second nature to you.").build(),
-                BackgroundEntity.builder().name("Folk Hero").description("You come from a humble social rank, but you are destined for so much more. The common folk regard you as their champion.").build(),
-                BackgroundEntity.builder().name("Guard").description("You have served as a guard, protecting people and property. Your experience has given you a keen eye for danger.").build(),
-                BackgroundEntity.builder().name("Guide").description("You know the wilderness like the back of your hand. You have spent time leading others through dangerous terrain.").build(),
-                BackgroundEntity.builder().name("Hermit").description("You lived in seclusion for a formative part of your life. In your time apart from society, you found quiet and solitude.").build(),
-                BackgroundEntity.builder().name("Merchant").description("You have spent your life buying and selling goods. You understand the value of things and how to negotiate a fair deal.").build(),
-                BackgroundEntity.builder().name("Noble").description("You understand wealth, power, and privilege. You carry a noble title, and your family owns land, collects taxes, and wields political influence.").build(),
-                BackgroundEntity.builder().name("Sage").description("You spent years learning the lore of the multiverse. You scoured manuscripts, studied scrolls, and listened to the greatest experts.").build(),
-                BackgroundEntity.builder().name("Sailor").description("You sailed on a seagoing vessel for years. In that time, you faced down mighty storms, monsters of the deep, and those who wanted to sink your craft.").build(),
-                BackgroundEntity.builder().name("Scribe").description("You have spent your life copying texts, maintaining records, and preserving knowledge. Your penmanship is impeccable.").build(),
-                BackgroundEntity.builder().name("Soldier").description("War has been your life for as long as you care to remember. You trained as a youth, studied the use of weapons and armor.").build(),
-                BackgroundEntity.builder().name("Vampire Devotee").description("You serve a vampire lord, having pledged yourself to their service in exchange for power or protection.").build(),
-                BackgroundEntity.builder().name("Vampire Survivor").description("You have survived an encounter with a vampire that left you changed. The experience haunts you still.").build(),
-                BackgroundEntity.builder().name("Wayfarer").description("You have spent your life on the road, traveling from place to place. You are comfortable with change and adapt quickly.").build()
+                BackgroundEntity.builder().name("Acolyte").description("You have spent your life in service to a temple, learning sacred rites and providing sacrifices to the god or gods you worship.").custom(false).build(),
+                BackgroundEntity.builder().name("Charlatan").description("You have always had a way with people. You know what makes them tick, you can tease out their hearts' desires, and with a few leading questions you can read them like they were children's books.").custom(false).build(),
+                BackgroundEntity.builder().name("Criminal").description("You are an experienced criminal with a history of breaking the law. You have spent a lot of time among other criminals and still have contacts within the criminal underworld.").custom(false).build(),
+                BackgroundEntity.builder().name("Entertainer").description("You thrive in front of an audience. You know how to entrance them, entertain them, and even inspire them.").custom(false).build(),
+                BackgroundEntity.builder().name("Folk Hero").description("You come from a humble social rank, but you are destined for so much more. Already the people of your home village regard you as their champion.").custom(false).build(),
+                BackgroundEntity.builder().name("Guild Artisan").description("You are a member of an artisan's guild, skilled in a particular field and closely associated with other artisans.").custom(false).build(),
+                BackgroundEntity.builder().name("Hermit").description("You lived in seclusion for a formative part of your life. In your time apart from the clamor of society, you found quiet, solitude, and perhaps some of the answers you were looking for.").custom(false).build(),
+                BackgroundEntity.builder().name("Noble").description("You understand wealth, power, and privilege. You carry a noble title, and your family owns land, collects taxes, and wields significant political influence.").custom(false).build(),
+                BackgroundEntity.builder().name("Outlander").description("You grew up in the wilds, far from civilization and the comforts of town and technology.").custom(false).build(),
+                BackgroundEntity.builder().name("Sage").description("You spent years learning the lore of the multiverse. You scoured manuscripts, studied scrolls, and listened to the greatest experts on the subjects that interest you.").custom(false).build(),
+                BackgroundEntity.builder().name("Sailor").description("You sailed on a seagoing vessel for years. In that time, you faced down mighty storms, monsters of the deep, and those who wanted to sink your craft to the bottomless depths.").custom(false).build(),
+                BackgroundEntity.builder().name("Soldier").description("War has been your life for as long as you care to remember. You trained as a youth, studied the use of weapons and armor, learned basic survival techniques.").custom(false).build(),
+                BackgroundEntity.builder().name("Urchin").description("You grew up on the streets alone, orphaned, and poor. You had no one to watch over you or to provide for you, so you learned to provide for yourself.").custom(false).build()
         );
-    }
-
-    // ==================== FEATURE (FEAT) CREATION ====================
-    private List<FeatureEntity> createFeatures() {
-        List<FeatureEntity> features = new ArrayList<>();
-
-        features.add(FeatureEntity.builder().name("Ability Score Improvement").description("Increase one ability score by 2, or two ability scores by 1 each.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Actor").description("Skilled at mimicry and dramatics, you gain advantage on Deception and Performance checks when trying to pass as a different person.").abilityBonus(Map.of(AbilityTypeEnum.CHARISMA, 1)).custom(false).build());
-        features.add(FeatureEntity.builder().name("Alert").description("Always on the lookout for danger, you gain a bonus to initiative and can't be surprised while conscious.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Archery").description("You gain a +2 bonus to attack rolls you make with ranged weapons.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Athlete").description("You have undergone extensive physical training, making climbing and jumping easier and allowing you to stand from prone quickly.").abilityBonus(Map.of(AbilityTypeEnum.STRENGTH, 1)).custom(false).build());
-        features.add(FeatureEntity.builder().name("Blind Fighting").description("You have blindsight with a range of 10 feet.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Bloodlust").description("Your thirst for blood grants you power in combat.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Bomber").description("You've mastered the creation and use of explosive devices.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Boon of Blazing Dawn").description("You can use a bonus action to emit bright light and deal radiant damage to nearby creatures.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Boon of Combat Prowess").description("When you miss with a melee attack, you can hit instead. Once per long rest.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Boon of Dimensional Travel").description("You can cast Misty Step without expending a spell slot a number of times equal to your proficiency bonus.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Boon of Energy Resistance").description("You gain resistance to two damage types of your choice.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Boon of Fate").description("You can add or subtract 2d4 from an attack roll, ability check, or saving throw you can see.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Boon of Fortitude").description("Your hit point maximum increases by 40.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Boon of Irresistible Offense").description("You can bypass damage resistances with your attacks.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Boon of Looming Shadows").description("You can use the Hide action as a bonus action on your turn.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Boon of Misty Escape").description("When you take damage, you can use your reaction to teleport up to 60 feet away.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Boon of Recovery").description("You can use a bonus action to regain hit points equal to half your hit point maximum. Once per long rest.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Boon of Skill").description("You gain proficiency in all skills.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Boon of Speed").description("Your walking speed increases by 30 feet.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Boon of Spell Recall").description("You can cast a spell you've already cast without expending a spell slot. Once per long rest.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Boon of the Night Spirit").description("You can become invisible as a bonus action. The invisibility lasts until you attack or cast a spell.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Boon of Truesight").description("You have truesight with a range of 60 feet.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Charger").description("When you Dash, you can make a melee attack with a bonus to damage or push the target.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Chef").description("You gain proficiency with cook's utensils and can prepare special food that grants temporary hit points.").abilityBonus(Map.of(AbilityTypeEnum.CONSTITUTION, 1)).custom(false).build());
-        features.add(FeatureEntity.builder().name("Cloying Mists").description("You can conjure mists that hinder your enemies.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Crafter").description("You gain proficiency with three artisan tools and can craft items more quickly.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Crossbow Expert").description("You ignore the loading property of crossbows and don't have disadvantage on ranged attacks in melee.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Crusher").description("Once per turn, when you hit with an attack that deals bludgeoning damage, you can move the target 5 feet.").abilityBonus(Map.of(AbilityTypeEnum.STRENGTH, 1)).custom(false).build());
-        features.add(FeatureEntity.builder().name("Defense").description("While you are wearing armor, you gain a +1 bonus to AC.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Defensive Duelist").description("When wielding a finesse weapon and hit by a melee attack, you can add your proficiency bonus to AC.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Delicious Pain").description("You can inflict pain that is strangely pleasurable to your victims.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Dual Wielder").description("You can use two-weapon fighting with non-light weapons and gain +1 AC when dual wielding.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Dueling").description("When wielding a melee weapon in one hand and no other weapons, you gain +2 to damage rolls.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Durable").description("When you roll Hit Dice to regain hit points, the minimum you regain equals twice your Constitution modifier.").abilityBonus(Map.of(AbilityTypeEnum.CONSTITUTION, 1)).custom(false).build());
-        features.add(FeatureEntity.builder().name("Elemental Adept").description("Spells you cast ignore resistance to a chosen damage type, and you treat 1s as 2s on damage dice.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Fey Touched").description("You learn Misty Step and one 1st-level divination or enchantment spell, castable once per long rest for free.").abilityBonus(Map.of(AbilityTypeEnum.INTELLIGENCE, 1)).custom(false).build());
-        features.add(FeatureEntity.builder().name("Grappler").description("You have advantage on attack rolls against creatures you are grappling.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Great Weapon Fighting").description("When you roll a 1 or 2 on damage dice with a two-handed weapon, you can reroll the die.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Great Weapon Master").description("On a critical hit or kill, you can make a bonus action melee attack. You can take -5 to hit for +10 damage.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Healer").description("You can use a healer's kit to restore hit points and stabilize creatures more effectively.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Heavily Armored").description("You gain proficiency with heavy armor.").abilityBonus(Map.of(AbilityTypeEnum.STRENGTH, 1)).custom(false).build());
-        features.add(FeatureEntity.builder().name("Heavy Armor Master").description("While wearing heavy armor, bludgeoning, piercing, and slashing damage you take is reduced by 3.").abilityBonus(Map.of(AbilityTypeEnum.STRENGTH, 1)).custom(false).build());
-        features.add(FeatureEntity.builder().name("Inspiring Leader").description("You can spend 10 minutes inspiring companions, granting them temporary hit points.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Interception").description("When a creature you can see hits a target within 5 feet of you, you can reduce the damage by 1d10 + proficiency bonus.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Keen Mind").description("You always know which way is north, when the next sunrise/sunset will occur, and can recall anything from the past month.").abilityBonus(Map.of(AbilityTypeEnum.INTELLIGENCE, 1)).custom(false).build());
-        features.add(FeatureEntity.builder().name("Light Bringer").description("You can cast Light cantrip and have resistance to radiant damage.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Lightly Armored").description("You gain proficiency with light armor.").abilityBonus(Map.of(AbilityTypeEnum.DEXTERITY, 1)).custom(false).build());
-        features.add(FeatureEntity.builder().name("Love Bites").description("Your bite attacks can charm creatures.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Lucky").description("You have 3 luck points to reroll attack rolls, ability checks, or saving throws.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Mage Slayer").description("You have advantage on saving throws against spells cast within 5 feet of you.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Magic Initiate").description("You learn two cantrips and one 1st-level spell from a chosen class's spell list.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Martial Weapon Training").description("You gain proficiency with martial weapons.").abilityBonus(Map.of(AbilityTypeEnum.STRENGTH, 1)).custom(false).build());
-        features.add(FeatureEntity.builder().name("Medium Armor Master").description("Wearing medium armor doesn't impose disadvantage on Stealth, and you can add 3 to AC if your Dexterity is 16+.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Moderately Armored").description("You gain proficiency with medium armor and shields.").abilityBonus(Map.of(AbilityTypeEnum.DEXTERITY, 1)).custom(false).build());
-        features.add(FeatureEntity.builder().name("Mounted Combatant").description("You have advantage on melee attacks against unmounted creatures smaller than your mount.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Musician").description("You gain proficiency with three musical instruments and can play to inspire allies.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Observant").description("You can read lips, and you gain a +5 bonus to passive Perception and Investigation.").abilityBonus(Map.of(AbilityTypeEnum.WISDOM, 1)).custom(false).build());
-        features.add(FeatureEntity.builder().name("Piercer").description("Once per turn, you can reroll one damage die when dealing piercing damage. Critical hits deal extra damage.").abilityBonus(Map.of(AbilityTypeEnum.DEXTERITY, 1)).custom(false).build());
-        features.add(FeatureEntity.builder().name("Poisoner").description("You can apply poison to weapons as a bonus action and ignore poison resistance.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Polearm Master").description("You can make opportunity attacks when creatures enter your reach and bonus action attacks with polearms.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Protection").description("When a creature attacks a target other than you within 5 feet, you can impose disadvantage on the attack roll.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Putrefy").description("You can cause food and drink to become poisonous to others.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Rebuke").description("When you are hit by an attack, you can use your reaction to deal damage to the attacker.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Resilient").description("You gain proficiency in saving throws using a chosen ability.").abilityBonus(Map.of(AbilityTypeEnum.CONSTITUTION, 1)).custom(false).build());
-        features.add(FeatureEntity.builder().name("Ritual Caster").description("You can cast certain spells as rituals from a ritual book.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Savage Attacker").description("Once per turn, you can reroll weapon damage dice and use either total.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Sentinel").description("Creatures you hit with opportunity attacks have their speed reduced to 0.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Shadow Touched").description("You learn Invisibility and one 1st-level illusion or necromancy spell, castable once per long rest for free.").abilityBonus(Map.of(AbilityTypeEnum.INTELLIGENCE, 1)).custom(false).build());
-        features.add(FeatureEntity.builder().name("Sharpshooter").description("You ignore cover and long range disadvantage. You can take -5 to hit for +10 damage with ranged weapons.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Shield Master").description("You can use your shield to shove creatures and add its AC bonus to Dexterity saving throws.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Skill Expert").description("You gain proficiency in one skill, expertise in one skill, and +1 to one ability score.").abilityBonus(Map.of(AbilityTypeEnum.DEXTERITY, 1)).custom(false).build());
-        features.add(FeatureEntity.builder().name("Skilled").description("You gain proficiency in any combination of three skills or tools.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Skulker").description("You can hide when lightly obscured and don't reveal your position when you miss with a ranged attack.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Slasher").description("Once per turn, you can reduce a creature's speed by 10 feet when dealing slashing damage.").abilityBonus(Map.of(AbilityTypeEnum.STRENGTH, 1)).custom(false).build());
-        features.add(FeatureEntity.builder().name("Speedy").description("Your speed increases by 10 feet, and you can Dash as a bonus action.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Spell Sniper").description("Your spell attacks ignore half and three-quarters cover, and attack spell range is doubled.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Tavern Brawler").description("You are proficient with improvised weapons and can grapple as a bonus action after hitting with an unarmed strike.").abilityBonus(Map.of(AbilityTypeEnum.STRENGTH, 1)).custom(false).build());
-        features.add(FeatureEntity.builder().name("Telekinetic").description("You learn Mage Hand and can use it invisibly. You can also shove creatures with your mind.").abilityBonus(Map.of(AbilityTypeEnum.INTELLIGENCE, 1)).custom(false).build());
-        features.add(FeatureEntity.builder().name("Telepathic").description("You can communicate telepathically with creatures within 60 feet and cast Detect Thoughts once per long rest.").abilityBonus(Map.of(AbilityTypeEnum.INTELLIGENCE, 1)).custom(false).build());
-        features.add(FeatureEntity.builder().name("Thrown Weapon Fighting").description("You can draw a thrown weapon as part of the attack, and you gain +2 to damage with thrown weapons.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Tireless Reveler").description("You need less sleep and are resistant to exhaustion from lack of rest.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Tough").description("Your hit point maximum increases by an amount equal to twice your level.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Treacherous Allure").description("You can use your charm to manipulate others into lowering their guard.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Two-Weapon Fighting").description("When you engage in two-weapon fighting, you can add your ability modifier to the damage of the second attack.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Unarmed Fighting").description("Your unarmed strikes deal 1d6 + Strength modifier damage, or 1d8 if both hands are free.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Vampire Hunter").description("You have trained to hunt and destroy vampires, gaining special abilities against them.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Vampire Touched").description("You have been touched by vampiric power, granting you minor vampiric abilities.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Vampire's Plaything").description("You have been enthralled by a vampire, giving you both benefits and drawbacks.").custom(false).build());
-        features.add(FeatureEntity.builder().name("War Caster").description("You have advantage on Constitution saves to maintain concentration and can cast spells as opportunity attacks.").custom(false).build());
-        features.add(FeatureEntity.builder().name("Weapon Master").description("You gain proficiency with four weapons of your choice.").abilityBonus(Map.of(AbilityTypeEnum.STRENGTH, 1)).custom(false).build());
-
-        return features;
     }
 
     // ==================== SUBRACE CREATION ====================
@@ -1350,8 +1213,17 @@ public class DataInitializer {
     // ==================== EQUIPMENT CREATION ====================
     private List<EquipmentEntity> createEquipment() {
         List<EquipmentEntity> equipment = new ArrayList<>();
-        equipment.addAll(createArmor());
-        equipment.addAll(createWeapons());
+        // Basic mundane equipment
+        equipment.addAll(createBasicArmor());
+        equipment.addAll(createBasicWeapons());
+        equipment.addAll(createPacks());
+        equipment.addAll(createTools());
+        equipment.addAll(createFoci());
+        equipment.addAll(createMusicalInstruments());
+        equipment.addAll(createAmmunition());
+        // Magic items
+        equipment.addAll(createMagicArmor());
+        equipment.addAll(createMagicWeapons());
         equipment.addAll(createPotions());
         equipment.addAll(createRings());
         equipment.addAll(createRods());
@@ -1362,7 +1234,168 @@ public class DataInitializer {
         return equipment;
     }
 
-    private List<EquipmentEntity> createArmor() {
+    // ==================== BASIC MUNDANE EQUIPMENT ====================
+    private List<EquipmentEntity> createBasicArmor() {
+        return List.of(
+            // Light Armor
+            EquipmentEntity.builder().name("Padded Armor").description("Light armor. AC 11 + Dex modifier. Disadvantage on Stealth checks.").equipmentCategory(EquipmentCategoryEnum.ARMOR).price(Map.of(CoinEnum.GP, 5)).weight(8).build(),
+            EquipmentEntity.builder().name("Leather Armor").description("Light armor. AC 11 + Dex modifier.").equipmentCategory(EquipmentCategoryEnum.ARMOR).price(Map.of(CoinEnum.GP, 10)).weight(10).build(),
+            EquipmentEntity.builder().name("Studded Leather Armor").description("Light armor. AC 12 + Dex modifier.").equipmentCategory(EquipmentCategoryEnum.ARMOR).price(Map.of(CoinEnum.GP, 45)).weight(13).build(),
+            // Medium Armor
+            EquipmentEntity.builder().name("Hide Armor").description("Medium armor. AC 12 + Dex modifier (max 2).").equipmentCategory(EquipmentCategoryEnum.ARMOR).price(Map.of(CoinEnum.GP, 10)).weight(12).build(),
+            EquipmentEntity.builder().name("Chain Shirt").description("Medium armor. AC 13 + Dex modifier (max 2).").equipmentCategory(EquipmentCategoryEnum.ARMOR).price(Map.of(CoinEnum.GP, 50)).weight(20).build(),
+            EquipmentEntity.builder().name("Scale Mail").description("Medium armor. AC 14 + Dex modifier (max 2). Disadvantage on Stealth checks.").equipmentCategory(EquipmentCategoryEnum.ARMOR).price(Map.of(CoinEnum.GP, 50)).weight(45).build(),
+            EquipmentEntity.builder().name("Breastplate").description("Medium armor. AC 14 + Dex modifier (max 2).").equipmentCategory(EquipmentCategoryEnum.ARMOR).price(Map.of(CoinEnum.GP, 400)).weight(20).build(),
+            EquipmentEntity.builder().name("Half Plate").description("Medium armor. AC 15 + Dex modifier (max 2). Disadvantage on Stealth checks.").equipmentCategory(EquipmentCategoryEnum.ARMOR).price(Map.of(CoinEnum.GP, 750)).weight(40).build(),
+            // Heavy Armor
+            EquipmentEntity.builder().name("Ring Mail").description("Heavy armor. AC 14. Disadvantage on Stealth checks.").equipmentCategory(EquipmentCategoryEnum.ARMOR).price(Map.of(CoinEnum.GP, 30)).weight(40).build(),
+            EquipmentEntity.builder().name("Chain Mail").description("Heavy armor. AC 16. Str 13 required. Disadvantage on Stealth checks.").equipmentCategory(EquipmentCategoryEnum.ARMOR).price(Map.of(CoinEnum.GP, 75)).weight(55).build(),
+            EquipmentEntity.builder().name("Splint Armor").description("Heavy armor. AC 17. Str 15 required. Disadvantage on Stealth checks.").equipmentCategory(EquipmentCategoryEnum.ARMOR).price(Map.of(CoinEnum.GP, 200)).weight(60).build(),
+            EquipmentEntity.builder().name("Plate Armor").description("Heavy armor. AC 18. Str 15 required. Disadvantage on Stealth checks.").equipmentCategory(EquipmentCategoryEnum.ARMOR).price(Map.of(CoinEnum.GP, 1500)).weight(65).build(),
+            // Shields
+            EquipmentEntity.builder().name("Shield").description("+2 bonus to AC.").equipmentCategory(EquipmentCategoryEnum.ARMOR).price(Map.of(CoinEnum.GP, 10)).weight(6).build(),
+            EquipmentEntity.builder().name("Wooden Shield").description("+2 bonus to AC. Made of wood, suitable for druids.").equipmentCategory(EquipmentCategoryEnum.ARMOR).price(Map.of(CoinEnum.GP, 10)).weight(6).build()
+        );
+    }
+
+    private List<EquipmentEntity> createBasicWeapons() {
+        return List.of(
+            // Simple Melee Weapons
+            EquipmentEntity.builder().name("Club").description("Simple melee weapon. 1d4 bludgeoning. Light.").equipmentCategory(EquipmentCategoryEnum.WEAPON).price(Map.of(CoinEnum.SP, 1)).weight(2).build(),
+            EquipmentEntity.builder().name("Dagger").description("Simple melee weapon. 1d4 piercing. Finesse, light, thrown (20/60).").equipmentCategory(EquipmentCategoryEnum.WEAPON).price(Map.of(CoinEnum.GP, 2)).weight(1).build(),
+            EquipmentEntity.builder().name("Greatclub").description("Simple melee weapon. 1d8 bludgeoning. Two-handed.").equipmentCategory(EquipmentCategoryEnum.WEAPON).price(Map.of(CoinEnum.SP, 2)).weight(10).build(),
+            EquipmentEntity.builder().name("Handaxe").description("Simple melee weapon. 1d6 slashing. Light, thrown (20/60).").equipmentCategory(EquipmentCategoryEnum.WEAPON).price(Map.of(CoinEnum.GP, 5)).weight(2).build(),
+            EquipmentEntity.builder().name("Javelin").description("Simple melee weapon. 1d6 piercing. Thrown (30/120).").equipmentCategory(EquipmentCategoryEnum.WEAPON).price(Map.of(CoinEnum.SP, 5)).weight(2).build(),
+            EquipmentEntity.builder().name("Light Hammer").description("Simple melee weapon. 1d4 bludgeoning. Light, thrown (20/60).").equipmentCategory(EquipmentCategoryEnum.WEAPON).price(Map.of(CoinEnum.GP, 2)).weight(2).build(),
+            EquipmentEntity.builder().name("Mace").description("Simple melee weapon. 1d6 bludgeoning.").equipmentCategory(EquipmentCategoryEnum.WEAPON).price(Map.of(CoinEnum.GP, 5)).weight(4).build(),
+            EquipmentEntity.builder().name("Quarterstaff").description("Simple melee weapon. 1d6 bludgeoning. Versatile (1d8).").equipmentCategory(EquipmentCategoryEnum.WEAPON).price(Map.of(CoinEnum.SP, 2)).weight(4).build(),
+            EquipmentEntity.builder().name("Sickle").description("Simple melee weapon. 1d4 slashing. Light.").equipmentCategory(EquipmentCategoryEnum.WEAPON).price(Map.of(CoinEnum.GP, 1)).weight(2).build(),
+            EquipmentEntity.builder().name("Spear").description("Simple melee weapon. 1d6 piercing. Thrown (20/60), versatile (1d8).").equipmentCategory(EquipmentCategoryEnum.WEAPON).price(Map.of(CoinEnum.GP, 1)).weight(3).build(),
+            // Simple Ranged Weapons
+            EquipmentEntity.builder().name("Light Crossbow").description("Simple ranged weapon. 1d8 piercing. Ammunition (80/320), loading, two-handed.").equipmentCategory(EquipmentCategoryEnum.WEAPON).price(Map.of(CoinEnum.GP, 25)).weight(5).build(),
+            EquipmentEntity.builder().name("Dart").description("Simple ranged weapon. 1d4 piercing. Finesse, thrown (20/60).").equipmentCategory(EquipmentCategoryEnum.WEAPON).price(Map.of(CoinEnum.CP, 5)).weight(0).build(),
+            EquipmentEntity.builder().name("Shortbow").description("Simple ranged weapon. 1d6 piercing. Ammunition (80/320), two-handed.").equipmentCategory(EquipmentCategoryEnum.WEAPON).price(Map.of(CoinEnum.GP, 25)).weight(2).build(),
+            EquipmentEntity.builder().name("Sling").description("Simple ranged weapon. 1d4 bludgeoning. Ammunition (30/120).").equipmentCategory(EquipmentCategoryEnum.WEAPON).price(Map.of(CoinEnum.SP, 1)).weight(0).build(),
+            // Martial Melee Weapons
+            EquipmentEntity.builder().name("Battleaxe").description("Martial melee weapon. 1d8 slashing. Versatile (1d10).").equipmentCategory(EquipmentCategoryEnum.WEAPON).price(Map.of(CoinEnum.GP, 10)).weight(4).build(),
+            EquipmentEntity.builder().name("Flail").description("Martial melee weapon. 1d8 bludgeoning.").equipmentCategory(EquipmentCategoryEnum.WEAPON).price(Map.of(CoinEnum.GP, 10)).weight(2).build(),
+            EquipmentEntity.builder().name("Glaive").description("Martial melee weapon. 1d10 slashing. Heavy, reach, two-handed.").equipmentCategory(EquipmentCategoryEnum.WEAPON).price(Map.of(CoinEnum.GP, 20)).weight(6).build(),
+            EquipmentEntity.builder().name("Greataxe").description("Martial melee weapon. 1d12 slashing. Heavy, two-handed.").equipmentCategory(EquipmentCategoryEnum.WEAPON).price(Map.of(CoinEnum.GP, 30)).weight(7).build(),
+            EquipmentEntity.builder().name("Greatsword").description("Martial melee weapon. 2d6 slashing. Heavy, two-handed.").equipmentCategory(EquipmentCategoryEnum.WEAPON).price(Map.of(CoinEnum.GP, 50)).weight(6).build(),
+            EquipmentEntity.builder().name("Halberd").description("Martial melee weapon. 1d10 slashing. Heavy, reach, two-handed.").equipmentCategory(EquipmentCategoryEnum.WEAPON).price(Map.of(CoinEnum.GP, 20)).weight(6).build(),
+            EquipmentEntity.builder().name("Lance").description("Martial melee weapon. 1d12 piercing. Reach, special.").equipmentCategory(EquipmentCategoryEnum.WEAPON).price(Map.of(CoinEnum.GP, 10)).weight(6).build(),
+            EquipmentEntity.builder().name("Longsword").description("Martial melee weapon. 1d8 slashing. Versatile (1d10).").equipmentCategory(EquipmentCategoryEnum.WEAPON).price(Map.of(CoinEnum.GP, 15)).weight(3).build(),
+            EquipmentEntity.builder().name("Maul").description("Martial melee weapon. 2d6 bludgeoning. Heavy, two-handed.").equipmentCategory(EquipmentCategoryEnum.WEAPON).price(Map.of(CoinEnum.GP, 10)).weight(10).build(),
+            EquipmentEntity.builder().name("Morningstar").description("Martial melee weapon. 1d8 piercing.").equipmentCategory(EquipmentCategoryEnum.WEAPON).price(Map.of(CoinEnum.GP, 15)).weight(4).build(),
+            EquipmentEntity.builder().name("Pike").description("Martial melee weapon. 1d10 piercing. Heavy, reach, two-handed.").equipmentCategory(EquipmentCategoryEnum.WEAPON).price(Map.of(CoinEnum.GP, 5)).weight(18).build(),
+            EquipmentEntity.builder().name("Rapier").description("Martial melee weapon. 1d8 piercing. Finesse.").equipmentCategory(EquipmentCategoryEnum.WEAPON).price(Map.of(CoinEnum.GP, 25)).weight(2).build(),
+            EquipmentEntity.builder().name("Scimitar").description("Martial melee weapon. 1d6 slashing. Finesse, light.").equipmentCategory(EquipmentCategoryEnum.WEAPON).price(Map.of(CoinEnum.GP, 25)).weight(3).build(),
+            EquipmentEntity.builder().name("Shortsword").description("Martial melee weapon. 1d6 piercing. Finesse, light.").equipmentCategory(EquipmentCategoryEnum.WEAPON).price(Map.of(CoinEnum.GP, 10)).weight(2).build(),
+            EquipmentEntity.builder().name("Trident").description("Martial melee weapon. 1d6 piercing. Thrown (20/60), versatile (1d8).").equipmentCategory(EquipmentCategoryEnum.WEAPON).price(Map.of(CoinEnum.GP, 5)).weight(4).build(),
+            EquipmentEntity.builder().name("War Pick").description("Martial melee weapon. 1d8 piercing.").equipmentCategory(EquipmentCategoryEnum.WEAPON).price(Map.of(CoinEnum.GP, 5)).weight(2).build(),
+            EquipmentEntity.builder().name("Warhammer").description("Martial melee weapon. 1d8 bludgeoning. Versatile (1d10).").equipmentCategory(EquipmentCategoryEnum.WEAPON).price(Map.of(CoinEnum.GP, 15)).weight(2).build(),
+            EquipmentEntity.builder().name("Whip").description("Martial melee weapon. 1d4 slashing. Finesse, reach.").equipmentCategory(EquipmentCategoryEnum.WEAPON).price(Map.of(CoinEnum.GP, 2)).weight(3).build(),
+            // Martial Ranged Weapons
+            EquipmentEntity.builder().name("Blowgun").description("Martial ranged weapon. 1 piercing. Ammunition (25/100), loading.").equipmentCategory(EquipmentCategoryEnum.WEAPON).price(Map.of(CoinEnum.GP, 10)).weight(1).build(),
+            EquipmentEntity.builder().name("Hand Crossbow").description("Martial ranged weapon. 1d6 piercing. Ammunition (30/120), light, loading.").equipmentCategory(EquipmentCategoryEnum.WEAPON).price(Map.of(CoinEnum.GP, 75)).weight(3).build(),
+            EquipmentEntity.builder().name("Heavy Crossbow").description("Martial ranged weapon. 1d10 piercing. Ammunition (100/400), heavy, loading, two-handed.").equipmentCategory(EquipmentCategoryEnum.WEAPON).price(Map.of(CoinEnum.GP, 50)).weight(18).build(),
+            EquipmentEntity.builder().name("Longbow").description("Martial ranged weapon. 1d8 piercing. Ammunition (150/600), heavy, two-handed.").equipmentCategory(EquipmentCategoryEnum.WEAPON).price(Map.of(CoinEnum.GP, 50)).weight(2).build(),
+            EquipmentEntity.builder().name("Net").description("Martial ranged weapon. Special. Thrown (5/15).").equipmentCategory(EquipmentCategoryEnum.WEAPON).price(Map.of(CoinEnum.GP, 1)).weight(3).build()
+        );
+    }
+
+    private List<EquipmentEntity> createPacks() {
+        return List.of(
+            EquipmentEntity.builder().name("Burglar's Pack").description("Includes a backpack, bag of 1,000 ball bearings, 10 feet of string, bell, 5 candles, crowbar, hammer, 10 pitons, hooded lantern, 2 flasks of oil, 5 days rations, tinderbox, waterskin, 50 feet of hempen rope.").equipmentCategory(EquipmentCategoryEnum.PACK).price(Map.of(CoinEnum.GP, 16)).build(),
+            EquipmentEntity.builder().name("Diplomat's Pack").description("Includes a chest, 2 cases for maps and scrolls, a set of fine clothes, a bottle of ink, an ink pen, a lamp, 2 flasks of oil, 5 sheets of paper, a vial of perfume, sealing wax, and soap.").equipmentCategory(EquipmentCategoryEnum.PACK).price(Map.of(CoinEnum.GP, 39)).build(),
+            EquipmentEntity.builder().name("Dungeoneer's Pack").description("Includes a backpack, crowbar, hammer, 10 pitons, 10 torches, tinderbox, 10 days of rations, waterskin, 50 feet of hempen rope.").equipmentCategory(EquipmentCategoryEnum.PACK).price(Map.of(CoinEnum.GP, 12)).build(),
+            EquipmentEntity.builder().name("Entertainer's Pack").description("Includes a backpack, bedroll, 2 costumes, 5 candles, 5 days of rations, waterskin, and a disguise kit.").equipmentCategory(EquipmentCategoryEnum.PACK).price(Map.of(CoinEnum.GP, 40)).build(),
+            EquipmentEntity.builder().name("Explorer's Pack").description("Includes a backpack, bedroll, mess kit, tinderbox, 10 torches, 10 days of rations, waterskin, 50 feet of hempen rope.").equipmentCategory(EquipmentCategoryEnum.PACK).price(Map.of(CoinEnum.GP, 10)).build(),
+            EquipmentEntity.builder().name("Priest's Pack").description("Includes a backpack, blanket, 10 candles, tinderbox, alms box, 2 blocks of incense, censer, vestments, 2 days of rations, waterskin.").equipmentCategory(EquipmentCategoryEnum.PACK).price(Map.of(CoinEnum.GP, 19)).build(),
+            EquipmentEntity.builder().name("Scholar's Pack").description("Includes a backpack, book of lore, bottle of ink, ink pen, 10 sheets of parchment, little bag of sand, small knife.").equipmentCategory(EquipmentCategoryEnum.PACK).price(Map.of(CoinEnum.GP, 40)).build()
+        );
+    }
+
+    private List<EquipmentEntity> createTools() {
+        return List.of(
+            EquipmentEntity.builder().name("Thieves' Tools").description("This set of tools includes a small file, a set of lock picks, a small mirror, a set of narrow-bladed scissors, and a pair of pliers.").equipmentCategory(EquipmentCategoryEnum.TOOL).price(Map.of(CoinEnum.GP, 25)).weight(1).build(),
+            EquipmentEntity.builder().name("Herbalism Kit").description("This kit contains a variety of instruments such as clippers, mortar and pestle, pouches, and vials used by herbalists.").equipmentCategory(EquipmentCategoryEnum.TOOL).price(Map.of(CoinEnum.GP, 5)).weight(3).build(),
+            EquipmentEntity.builder().name("Alchemist's Supplies").description("These supplies enable a character to produce useful concoctions.").equipmentCategory(EquipmentCategoryEnum.TOOL).price(Map.of(CoinEnum.GP, 50)).weight(8).build(),
+            EquipmentEntity.builder().name("Smith's Tools").description("Smith's tools allow you to work metal.").equipmentCategory(EquipmentCategoryEnum.TOOL).price(Map.of(CoinEnum.GP, 20)).weight(8).build(),
+            EquipmentEntity.builder().name("Brewer's Supplies").description("Brewing is the art of producing beer.").equipmentCategory(EquipmentCategoryEnum.TOOL).price(Map.of(CoinEnum.GP, 20)).weight(9).build(),
+            EquipmentEntity.builder().name("Calligrapher's Supplies").description("Calligraphy treats writing as an elegant art.").equipmentCategory(EquipmentCategoryEnum.TOOL).price(Map.of(CoinEnum.GP, 10)).weight(5).build(),
+            EquipmentEntity.builder().name("Carpenter's Tools").description("These tools are used to build wooden structures.").equipmentCategory(EquipmentCategoryEnum.TOOL).price(Map.of(CoinEnum.GP, 8)).weight(6).build(),
+            EquipmentEntity.builder().name("Cartographer's Tools").description("These tools are used to draw maps.").equipmentCategory(EquipmentCategoryEnum.TOOL).price(Map.of(CoinEnum.GP, 15)).weight(6).build(),
+            EquipmentEntity.builder().name("Cobbler's Tools").description("These tools are used to make and repair shoes.").equipmentCategory(EquipmentCategoryEnum.TOOL).price(Map.of(CoinEnum.GP, 5)).weight(5).build(),
+            EquipmentEntity.builder().name("Cook's Utensils").description("Adventuring is hard work. With a cook along on the journey, meals will be more nutritious.").equipmentCategory(EquipmentCategoryEnum.TOOL).price(Map.of(CoinEnum.GP, 1)).weight(8).build(),
+            EquipmentEntity.builder().name("Glassblower's Tools").description("These tools are used to craft glass objects.").equipmentCategory(EquipmentCategoryEnum.TOOL).price(Map.of(CoinEnum.GP, 30)).weight(5).build(),
+            EquipmentEntity.builder().name("Jeweler's Tools").description("These tools are used to cut gems and craft jewelry.").equipmentCategory(EquipmentCategoryEnum.TOOL).price(Map.of(CoinEnum.GP, 25)).weight(2).build(),
+            EquipmentEntity.builder().name("Leatherworker's Tools").description("These tools are used to work leather.").equipmentCategory(EquipmentCategoryEnum.TOOL).price(Map.of(CoinEnum.GP, 5)).weight(5).build(),
+            EquipmentEntity.builder().name("Mason's Tools").description("These tools are used to work with stone.").equipmentCategory(EquipmentCategoryEnum.TOOL).price(Map.of(CoinEnum.GP, 10)).weight(8).build(),
+            EquipmentEntity.builder().name("Painter's Supplies").description("These supplies enable a character to create art.").equipmentCategory(EquipmentCategoryEnum.TOOL).price(Map.of(CoinEnum.GP, 10)).weight(5).build(),
+            EquipmentEntity.builder().name("Potter's Tools").description("These tools are used to craft pottery and ceramics.").equipmentCategory(EquipmentCategoryEnum.TOOL).price(Map.of(CoinEnum.GP, 10)).weight(3).build(),
+            EquipmentEntity.builder().name("Tinker's Tools").description("These tools are used to repair many kinds of items.").equipmentCategory(EquipmentCategoryEnum.TOOL).price(Map.of(CoinEnum.GP, 50)).weight(10).build(),
+            EquipmentEntity.builder().name("Weaver's Tools").description("These tools are used to create cloth and textiles.").equipmentCategory(EquipmentCategoryEnum.TOOL).price(Map.of(CoinEnum.GP, 1)).weight(5).build(),
+            EquipmentEntity.builder().name("Woodcarver's Tools").description("These tools are used to carve wood.").equipmentCategory(EquipmentCategoryEnum.TOOL).price(Map.of(CoinEnum.GP, 1)).weight(5).build(),
+            EquipmentEntity.builder().name("Disguise Kit").description("This pouch of cosmetics, hair dye, and small props lets you create disguises.").equipmentCategory(EquipmentCategoryEnum.TOOL).price(Map.of(CoinEnum.GP, 25)).weight(3).build(),
+            EquipmentEntity.builder().name("Forgery Kit").description("This small box contains papers, pens, seals, and other supplies for creating forgeries.").equipmentCategory(EquipmentCategoryEnum.TOOL).price(Map.of(CoinEnum.GP, 15)).weight(5).build(),
+            EquipmentEntity.builder().name("Gaming Set (Dice)").description("A set of dice for playing games of chance.").equipmentCategory(EquipmentCategoryEnum.TOOL).price(Map.of(CoinEnum.SP, 1)).weight(0).build(),
+            EquipmentEntity.builder().name("Gaming Set (Playing Cards)").description("A deck of cards for playing games.").equipmentCategory(EquipmentCategoryEnum.TOOL).price(Map.of(CoinEnum.SP, 5)).weight(0).build(),
+            EquipmentEntity.builder().name("Navigator's Tools").description("These tools are used for navigation at sea.").equipmentCategory(EquipmentCategoryEnum.TOOL).price(Map.of(CoinEnum.GP, 25)).weight(2).build(),
+            EquipmentEntity.builder().name("Poisoner's Kit").description("A poisoner's kit includes the vials, chemicals, and other equipment necessary for creating poisons.").equipmentCategory(EquipmentCategoryEnum.TOOL).price(Map.of(CoinEnum.GP, 50)).weight(2).build()
+        );
+    }
+
+    private List<EquipmentEntity> createFoci() {
+        return List.of(
+            // Arcane Foci
+            EquipmentEntity.builder().name("Arcane Focus (Crystal)").description("An arcane focus is a special item designed to channel the power of arcane spells.").equipmentCategory(EquipmentCategoryEnum.FOCUS).price(Map.of(CoinEnum.GP, 10)).weight(1).build(),
+            EquipmentEntity.builder().name("Arcane Focus (Orb)").description("An arcane focus is a special item designed to channel the power of arcane spells.").equipmentCategory(EquipmentCategoryEnum.FOCUS).price(Map.of(CoinEnum.GP, 20)).weight(3).build(),
+            EquipmentEntity.builder().name("Arcane Focus (Rod)").description("An arcane focus is a special item designed to channel the power of arcane spells.").equipmentCategory(EquipmentCategoryEnum.FOCUS).price(Map.of(CoinEnum.GP, 10)).weight(2).build(),
+            EquipmentEntity.builder().name("Arcane Focus (Staff)").description("An arcane focus is a special item designed to channel the power of arcane spells.").equipmentCategory(EquipmentCategoryEnum.FOCUS).price(Map.of(CoinEnum.GP, 5)).weight(4).build(),
+            EquipmentEntity.builder().name("Arcane Focus (Wand)").description("An arcane focus is a special item designed to channel the power of arcane spells.").equipmentCategory(EquipmentCategoryEnum.FOCUS).price(Map.of(CoinEnum.GP, 10)).weight(1).build(),
+            // Divine Foci
+            EquipmentEntity.builder().name("Holy Symbol (Amulet)").description("A holy symbol is a representation of a god or pantheon.").equipmentCategory(EquipmentCategoryEnum.FOCUS).price(Map.of(CoinEnum.GP, 5)).weight(1).build(),
+            EquipmentEntity.builder().name("Holy Symbol (Emblem)").description("A holy symbol is a representation of a god or pantheon.").equipmentCategory(EquipmentCategoryEnum.FOCUS).price(Map.of(CoinEnum.GP, 5)).weight(0).build(),
+            EquipmentEntity.builder().name("Holy Symbol (Reliquary)").description("A holy symbol is a representation of a god or pantheon.").equipmentCategory(EquipmentCategoryEnum.FOCUS).price(Map.of(CoinEnum.GP, 5)).weight(2).build(),
+            // Druidic Focus
+            EquipmentEntity.builder().name("Druidic Focus (Sprig of Mistletoe)").description("A druidic focus might be a sprig of mistletoe or holly.").equipmentCategory(EquipmentCategoryEnum.FOCUS).price(Map.of(CoinEnum.GP, 1)).weight(0).build(),
+            EquipmentEntity.builder().name("Druidic Focus (Totem)").description("A druidic focus might be a totem object incorporating feathers, fur, bones, or teeth.").equipmentCategory(EquipmentCategoryEnum.FOCUS).price(Map.of(CoinEnum.GP, 1)).weight(0).build(),
+            EquipmentEntity.builder().name("Druidic Focus (Wooden Staff)").description("A druidic focus might be a wooden staff drawn whole from a living tree.").equipmentCategory(EquipmentCategoryEnum.FOCUS).price(Map.of(CoinEnum.GP, 5)).weight(4).build(),
+            EquipmentEntity.builder().name("Druidic Focus (Yew Wand)").description("A druidic focus might be a yew wand.").equipmentCategory(EquipmentCategoryEnum.FOCUS).price(Map.of(CoinEnum.GP, 10)).weight(1).build(),
+            // Component Pouch
+            EquipmentEntity.builder().name("Component Pouch").description("A component pouch is a small, watertight leather belt pouch that has compartments to hold all the material components and other special items you need to cast your spells.").equipmentCategory(EquipmentCategoryEnum.FOCUS).price(Map.of(CoinEnum.GP, 25)).weight(2).build(),
+            // Spellbook
+            EquipmentEntity.builder().name("Spellbook").description("Essential for wizards, a spellbook is a leather-bound tome with 100 blank vellum pages suitable for recording spells.").equipmentCategory(EquipmentCategoryEnum.GEAR).price(Map.of(CoinEnum.GP, 50)).weight(3).build()
+        );
+    }
+
+    private List<EquipmentEntity> createMusicalInstruments() {
+        return List.of(
+            EquipmentEntity.builder().name("Bagpipes").description("A wind instrument using enclosed reeds fed from a constant reservoir of air.").equipmentCategory(EquipmentCategoryEnum.MUSICAL_INSTRUMENT).price(Map.of(CoinEnum.GP, 30)).weight(6).build(),
+            EquipmentEntity.builder().name("Drum").description("A percussion instrument consisting of a membrane stretched over a hollow body.").equipmentCategory(EquipmentCategoryEnum.MUSICAL_INSTRUMENT).price(Map.of(CoinEnum.GP, 6)).weight(3).build(),
+            EquipmentEntity.builder().name("Dulcimer").description("A stringed instrument with strings stretched over a trapezoidal sounding board.").equipmentCategory(EquipmentCategoryEnum.MUSICAL_INSTRUMENT).price(Map.of(CoinEnum.GP, 25)).weight(10).build(),
+            EquipmentEntity.builder().name("Flute").description("A wind instrument that produces sound from the flow of air across an opening.").equipmentCategory(EquipmentCategoryEnum.MUSICAL_INSTRUMENT).price(Map.of(CoinEnum.GP, 2)).weight(1).build(),
+            EquipmentEntity.builder().name("Lute").description("A stringed instrument with a neck and a deep round back.").equipmentCategory(EquipmentCategoryEnum.MUSICAL_INSTRUMENT).price(Map.of(CoinEnum.GP, 35)).weight(2).build(),
+            EquipmentEntity.builder().name("Lyre").description("A stringed instrument with a yoke consisting of two arms and a crossbar.").equipmentCategory(EquipmentCategoryEnum.MUSICAL_INSTRUMENT).price(Map.of(CoinEnum.GP, 30)).weight(2).build(),
+            EquipmentEntity.builder().name("Horn").description("A wind instrument made of brass or horn.").equipmentCategory(EquipmentCategoryEnum.MUSICAL_INSTRUMENT).price(Map.of(CoinEnum.GP, 3)).weight(2).build(),
+            EquipmentEntity.builder().name("Pan Flute").description("A wind instrument made from several pipes of gradually increasing length.").equipmentCategory(EquipmentCategoryEnum.MUSICAL_INSTRUMENT).price(Map.of(CoinEnum.GP, 12)).weight(2).build(),
+            EquipmentEntity.builder().name("Shawm").description("A loud double-reed woodwind instrument.").equipmentCategory(EquipmentCategoryEnum.MUSICAL_INSTRUMENT).price(Map.of(CoinEnum.GP, 2)).weight(1).build(),
+            EquipmentEntity.builder().name("Viol").description("A stringed instrument played with a bow.").equipmentCategory(EquipmentCategoryEnum.MUSICAL_INSTRUMENT).price(Map.of(CoinEnum.GP, 30)).weight(1).build()
+        );
+    }
+
+    private List<EquipmentEntity> createAmmunition() {
+        return List.of(
+            EquipmentEntity.builder().name("Arrows (20)").description("20 arrows for bows.").equipmentCategory(EquipmentCategoryEnum.AMMUNITION).price(Map.of(CoinEnum.GP, 1)).weight(1).build(),
+            EquipmentEntity.builder().name("Blowgun Needles (50)").description("50 needles for blowguns.").equipmentCategory(EquipmentCategoryEnum.AMMUNITION).price(Map.of(CoinEnum.GP, 1)).weight(1).build(),
+            EquipmentEntity.builder().name("Crossbow Bolts (20)").description("20 bolts for crossbows.").equipmentCategory(EquipmentCategoryEnum.AMMUNITION).price(Map.of(CoinEnum.GP, 1)).weight(2).build(),
+            EquipmentEntity.builder().name("Sling Bullets (20)").description("20 bullets for slings.").equipmentCategory(EquipmentCategoryEnum.AMMUNITION).price(Map.of(CoinEnum.CP, 4)).weight(2).build(),
+            EquipmentEntity.builder().name("Quiver").description("A quiver can hold up to 20 arrows.").equipmentCategory(EquipmentCategoryEnum.GEAR).price(Map.of(CoinEnum.GP, 1)).weight(1).build()
+        );
+    }
+
+    private List<EquipmentEntity> createMagicArmor() {
         return List.of(
             // Armor +1/+2/+3
             EquipmentEntity.builder().name("Armor +1").description("You have a +1 bonus to AC while wearing this armor.").equipmentCategory(EquipmentCategoryEnum.ARMOR).build(),
@@ -1393,9 +1426,9 @@ public class DataInitializer {
         );
     }
 
-    private List<EquipmentEntity> createWeapons() {
+    private List<EquipmentEntity> createMagicWeapons() {
         return List.of(
-            // Basic Magic Weapons
+            // Magic Weapons
             EquipmentEntity.builder().name("Weapon +1").description("You have a +1 bonus to attack and damage rolls made with this magic weapon.").equipmentCategory(EquipmentCategoryEnum.WEAPON).build(),
             EquipmentEntity.builder().name("Weapon +2").description("You have a +2 bonus to attack and damage rolls made with this magic weapon.").equipmentCategory(EquipmentCategoryEnum.WEAPON).build(),
             EquipmentEntity.builder().name("Weapon +3").description("You have a +3 bonus to attack and damage rolls made with this magic weapon.").equipmentCategory(EquipmentCategoryEnum.WEAPON).build(),
@@ -1753,11 +1786,6 @@ public class DataInitializer {
                 .map(name -> attributeCache.get(name))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
-    }
-
-    private String getClassId(String className) {
-        ClassEntity classEntity = classCache.get(className);
-        return classEntity != null ? classEntity.getId() : null;
     }
 
     private String getRaceId(String raceName) {

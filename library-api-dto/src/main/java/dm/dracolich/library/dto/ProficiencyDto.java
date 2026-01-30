@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Proficiency {
+public class ProficiencyDto {
     private String id;
     private String name;
     private AbilityTypeEnum proficiencyType;

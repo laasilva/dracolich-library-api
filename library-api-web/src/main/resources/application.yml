@@ -1,9 +1,12 @@
 spring:
   application:
     name: dracolich-library-api
+  webflux:
+    base-path: dracolich-library/api/v0/
   data:
     mongodb:
       uri: ${MONGODB_URI:mongodb://localhost:27017/dracolich-library}
+      database: ${MONGODB_DATABASE:dracolich-library}
       auto-index-creation: true
 
 server:
