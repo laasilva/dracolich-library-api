@@ -5,9 +5,12 @@ spring:
     base-path: dracolich-library/api/v0/
   data:
     mongodb:
-      uri: ${MONGODB_URI:mongodb://localhost:27017/dracolich-library}
-      database: ${MONGODB_DATABASE:dracolich-library}
       auto-index-creation: true
+  mongodb:
+    database: ${MONGODB_DATABASE:dracolich-library-db}
+    uri: ${MONGODB_URI:mongodb://localhost:27017/dracolich-library-db}
+    representation:
+      uuid: standard
 
 server:
   port: ${PORT:8080}
