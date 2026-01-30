@@ -19,12 +19,12 @@ public class SubclassServiceImpl implements SubclassService {
     @Override
     public Mono<SubclassDto> fetchSubclassByName(String name) {
         return repo.findByNameIgnoreCase(name)
-                .map(mapper::entityToRecord);
+                .map(mapper::entityToDto);
     }
 
     @Override
     public Flux<SubclassDto> fetchSubclassesByClassName(String className) {
         return repo.findAllByClassNameIgnoreCase(className)
-                .map(mapper::entityToRecord);
+                .map(mapper::entityToDto);
     }
 }

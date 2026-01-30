@@ -50,10 +50,10 @@ public class ClassServiceImpl implements ClassService {
     }
 
     private Mono<ClassDto> enrichWithSubclasses(ClassEntity classEntity) {
-        var mapped = mapper.entityToRecord(classEntity);
+        var mapped = mapper.entityToDto(classEntity);
 
         return subclassRepo.findAllByClassNameIgnoreCase(classEntity.getName())
-                .map(subclassMapper::entityToRecord)
+                .map(subclassMapper::entityToDto)
                 .collectList()
                 .map(subclassesList -> {
                     mapped.setSubclasses(new HashSet<>(subclassesList));

@@ -60,6 +60,17 @@ Swagger UI is available at: `http://localhost:8080/dracolich-library/api/v0/swag
 | `GET` | `/subclasses/class/{className}` | Fetch all subclasses for a given class |
 | `GET` | `/subclasses/{name}` | Fetch a subclass by name |
 
+#### Spells
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/spells/all` | Fetch all spells |
+| `GET` | `/spells/level/{level}` | Fetch spells by spell level (0-9) |
+| `GET` | `/spells/type/{type}` | Fetch spells by type |
+| `GET` | `/spells/name/{name}` | Fetch a spell by name |
+
+**Spell Types:** `HEAL`, `ATTACK`, `CONCENTRATION`, `UTILITY`
+
 ## Data Model
 
 The API provides data for the following game entities:

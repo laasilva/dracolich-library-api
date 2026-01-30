@@ -8,6 +8,6 @@ import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.FIELD)
 public interface ClassMapper {
-    ClassDto entityToRecord(ClassEntity entity);
+    ClassDto entityToDto(ClassEntity entity);
     ClassResumedRecord entityToResumedRecord(ClassEntity entity);
 }

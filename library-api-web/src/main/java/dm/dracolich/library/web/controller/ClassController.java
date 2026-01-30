@@ -21,7 +21,7 @@ import reactor.core.publisher.Mono;
 public class ClassController {
     private final ClassService service;
 
-    @Operation(summary = "Fetch all classes", description = "Returns all D&D classes")
+    @Operation(summary = "Fetch all classes", description = "Returns all classes")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Classes fetched successfully",
                     content = @Content(schema = @Schema(implementation = ClassDto.class)))
@@ -34,7 +34,7 @@ public class ClassController {
         return service.fetchAllClasses();
     }
 
-    @Operation(summary = "Fetch all classes", description = "Returns one D&D class by name")
+    @Operation(summary = "Fetch all classes", description = "Returns one class by name")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Classes fetched successfully",
                     content = @Content(schema = @Schema(implementation = ClassDto.class)))

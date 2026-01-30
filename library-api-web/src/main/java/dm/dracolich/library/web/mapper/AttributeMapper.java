@@ -8,5 +8,5 @@ import org.mapstruct.Mapper;
 @Mapper(componentModel = "spring",
         injectionStrategy = InjectionStrategy.FIELD)
 public interface AttributeMapper {
-    AttributeDto entityToRecord(AttributeEntity entity);
+    AttributeDto entityToDto(AttributeEntity entity);
 }

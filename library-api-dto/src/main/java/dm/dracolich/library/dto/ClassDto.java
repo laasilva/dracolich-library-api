@@ -8,8 +8,6 @@ import java.util.Map;
 import java.util.Set;
 
 @Data
-@Getter
-@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
