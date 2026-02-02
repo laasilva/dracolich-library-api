@@ -1,6 +1,5 @@
 package dm.dracolich.library.web.controller;
 
-import dm.dracolich.library.dto.ClassDto;
 import dm.dracolich.library.dto.SpellDto;
 import dm.dracolich.library.dto.enums.SchoolTypeEnum;
 import dm.dracolich.library.dto.enums.SpellTypeEnum;
@@ -27,17 +26,17 @@ public class SpellController {
     @Operation(summary = "Fetch all spells by name", description = "Returns all spells by name")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Spells fetched successfully",
-                    content = @Content(schema = @Schema(implementation = ClassDto.class)))
+                    content = @Content(schema = @Schema(implementation = SpellDto.class)))
     })
     @GetMapping(path = {""}, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<SpellDto> fetchSpellsByName(@RequestParam String name) {
         return service.fetchSpellByName(name);
     }
 
-    @Operation(summary = "Fetch all spells by school type", description = "Returns all spells by school type")
+    @Operation(summary = "Search all spells", description = "Returns all spells by filters, type, school or level (0 - cantrip, 1-9 - spell level)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Spells fetched successfully",
-                    content = @Content(schema = @Schema(implementation = ClassDto.class)))
+                    content = @Content(schema = @Schema(implementation = SpellDto.class)))
     })
     @GetMapping(path = {"/filter"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public Flux<SpellDto> fetchSpellsFilter(@RequestParam(required = false) Integer level,
@@ -46,10 +45,10 @@ public class SpellController {
         return service.fetchSpellsByFilters(level, type, school);
     }
 
-    @Operation(summary = "Search all spells by name", description = "Returns subclasses by search results")
+    @Operation(summary = "Search all spells by name", description = "Returns spells by search results")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Spells fetched successfully",
-                    content = @Content(schema = @Schema(implementation = ClassDto.class)))
+                    content = @Content(schema = @Schema(implementation = SpellDto.class)))
     })
     @GetMapping(path = {"/search"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public Flux<SpellDto> searchSpellsByName(@RequestParam String name) {

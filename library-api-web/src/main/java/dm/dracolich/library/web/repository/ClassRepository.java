@@ -11,5 +11,5 @@ import reactor.core.publisher.Mono;
 @Repository
 public interface ClassRepository extends ReactiveMongoRepository<ClassEntity, String>, ReactiveQueryByExampleExecutor<ClassEntity> {
     Mono<ClassEntity> findByNameIgnoreCase(String name);
-    Flux<ClassEntity> findAllByClassNameIgnoreCase(String className);
+    Flux<ClassEntity> findAllByClassNameContainingIgnoreCase(String className);
 }

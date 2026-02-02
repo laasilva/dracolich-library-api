@@ -5,6 +5,7 @@ import dm.dracolich.library.dto.enums.CoinEnum;
 import dm.dracolich.library.dto.enums.DamageTypeEnum;
 import dm.dracolich.library.dto.enums.EquipmentCategoryEnum;
 import dm.dracolich.library.web.config.initializer.ClassInitializer;
+import dm.dracolich.library.web.config.initializer.RaceInitializer;
 import dm.dracolich.library.web.config.initializer.SpellInitializer;
 import dm.dracolich.library.web.config.initializer.SubclassInitializer;
 import dm.dracolich.library.web.entity.*;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DataInitializer {
     private final ClassInitializer classInitializer;
+    private final RaceInitializer raceInitializer;
     private final SubclassInitializer subclassInitializer;
     private final SpellInitializer spellInitializer;
     private final AttributeRepository attributeRepository;
@@ -41,6 +43,7 @@ public class DataInitializer {
     private final Map<String, ClassEntity> classCache = new HashMap<>();
     private final Map<String, AttributeEntity> attributeCache = new HashMap<>();
     private final Map<String, RaceEntity> raceCache = new HashMap<>();
+    private final Map<String, SpellEntity> spellCache = new HashMap<>();
 
     @EventListener(ApplicationReadyEvent.class)
     public void initializeData() {
@@ -62,14 +65,14 @@ public class DataInitializer {
 
     private Mono<Void> seedAllData() {
         return seedAttributes()
+                .then(Mono.defer(this::seedSpells))  // Spells must be seeded before races/subraces (for cantripsAndSpells)
                 .then(Mono.defer(this::seedRaces))
+                .then(Mono.defer(this::seedSubraces))
                 .then(Mono.defer(this::seedClasses))
                 .then(Mono.defer(this::seedSubclasses))
                 .then(Mono.defer(this::seedAlignments))
                 .then(Mono.defer(this::seedBackgrounds))
                 .then(Mono.defer(this::seedFeatures))
-                .then(Mono.defer(this::seedSubraces))
-                .then(Mono.defer(this::seedSpells))
                 .then(Mono.defer(this::seedEquipment))
                 .then(Mono.fromRunnable(() -> log.info("All seed data inserted successfully")));
     }
@@ -85,7 +88,8 @@ public class DataInitializer {
 
     private Mono<Void> seedRaces() {
         log.info("Seeding races...");
-        List<RaceEntity> races = createRaces();
+        raceInitializer.setSpellCache(spellCache);
+        List<RaceEntity> races = raceInitializer.createRaces();
         return raceRepository.saveAll(races)
                 .doOnNext(race -> raceCache.put(race.getName(), race))
                 .then()
@@ -135,7 +139,10 @@ public class DataInitializer {
 
     private Mono<Void> seedSubraces() {
         log.info("Seeding subraces...");
-        List<SubraceEntity> subraces = createSubraces();
+        // Create a map of race names from the cache for the initializer
+        Map<String, String> raceNameMap = raceCache.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getName()));
+        List<SubraceEntity> subraces = raceInitializer.createSubraces(raceNameMap);
         return subraceRepository.saveAll(subraces)
                 .then()
                 .doOnSuccess(v -> log.info("Seeded {} subraces", subraces.size()));
@@ -451,134 +458,6 @@ public class DataInitializer {
         return attributes;
     }
 
-    // ==================== RACE CREATION ====================
-    private List<RaceEntity> createRaces() {
-        return List.of(
-                // Aasimar: Celestial Resistance, Darkvision, Healing Hands, Light Bearer, Celestial Revelation
-                // +2 CHA
-                RaceEntity.builder()
-                        .name("Aasimar")
-                        .raceAttributes(getAttributeSet("Celestial Resistance", "Darkvision", "Healing Hands", "Light Bearer", "Celestial Revelation"))
-                        .abilityBonus(Map.of(AbilityTypeEnum.CHARISMA, 2))
-                        .custom(false)
-                        .build(),
-
-                // Dragonborn: Dragon Ancestry, Breath Weapon, Damage Resistance, Darkvision, Flight
-                // +2 STR, +1 CHA
-                RaceEntity.builder()
-                        .name("Dragonborn")
-                        .raceAttributes(getAttributeSet("Dragon Ancestry", "Breath Weapon", "Damage Resistance", "Darkvision", "Flight"))
-                        .abilityBonus(Map.of(AbilityTypeEnum.STRENGTH, 2, AbilityTypeEnum.CHARISMA, 1))
-                        .custom(false)
-                        .build(),
-
-                // Dwarf: Darkvision, Dwarven Resilience, Dwarven Toughness, Stonecunning
-                // +2 CON
-                RaceEntity.builder()
-                        .name("Dwarf")
-                        .raceAttributes(getAttributeSet("Darkvision", "Dwarven Resilience", "Dwarven Toughness", "Stonecunning"))
-                        .abilityBonus(Map.of(AbilityTypeEnum.CONSTITUTION, 2))
-                        .custom(false)
-                        .build(),
-
-                // Elf: Darkvision, Elven Lineage, Fey Ancestry, Keen Senses, Trance
-                // +2 DEX
-                RaceEntity.builder()
-                        .name("Elf")
-                        .raceAttributes(getAttributeSet("Darkvision", "Elven Lineage", "Fey Ancestry", "Keen Senses", "Trance"))
-                        .abilityBonus(Map.of(AbilityTypeEnum.DEXTERITY, 2))
-                        .custom(false)
-                        .build(),
-
-                // Gnome: Darkvision, Gnomish Cunning, Gnomish Lineage
-                // +2 INT
-                RaceEntity.builder()
-                        .name("Gnome")
-                        .raceAttributes(getAttributeSet("Darkvision", "Gnomish Cunning", "Gnomish Lineage"))
-                        .abilityBonus(Map.of(AbilityTypeEnum.INTELLIGENCE, 2))
-                        .custom(false)
-                        .build(),
-
-                // Goliath: Giant Ancestry, Large Form, Powerful Build
-                // +2 STR, +1 CON
-                RaceEntity.builder()
-                        .name("Goliath")
-                        .raceAttributes(getAttributeSet("Giant Ancestry", "Large Form", "Powerful Build"))
-                        .abilityBonus(Map.of(AbilityTypeEnum.STRENGTH, 2, AbilityTypeEnum.CONSTITUTION, 1))
-                        .custom(false)
-                        .build(),
-
-                // Halfling: Brave, Halfling Nimbleness, Luck, Stealthy
-                // +2 DEX
-                RaceEntity.builder()
-                        .name("Halfling")
-                        .raceAttributes(getAttributeSet("Brave", "Halfling Nimbleness", "Luck", "Stealthy"))
-                        .abilityBonus(Map.of(AbilityTypeEnum.DEXTERITY, 2))
-                        .custom(false)
-                        .build(),
-
-                // Human: Resourceful, Skillful, Versatile
-                // +1 to all abilities
-                RaceEntity.builder()
-                        .name("Human")
-                        .raceAttributes(getAttributeSet("Resourceful", "Skillful", "Versatile"))
-                        .abilityBonus(Map.of(
-                                AbilityTypeEnum.STRENGTH, 1,
-                                AbilityTypeEnum.DEXTERITY, 1,
-                                AbilityTypeEnum.CONSTITUTION, 1,
-                                AbilityTypeEnum.INTELLIGENCE, 1,
-                                AbilityTypeEnum.WISDOM, 1,
-                                AbilityTypeEnum.CHARISMA, 1
-                        ))
-                        .custom(false)
-                        .build(),
-
-                // Orc: Adrenaline Rush, Darkvision, Relentless, Endurance
-                // +2 STR, +1 CON
-                RaceEntity.builder()
-                        .name("Orc")
-                        .raceAttributes(getAttributeSet("Adrenaline Rush", "Darkvision", "Relentless", "Endurance"))
-                        .abilityBonus(Map.of(AbilityTypeEnum.STRENGTH, 2, AbilityTypeEnum.CONSTITUTION, 1))
-                        .custom(false)
-                        .build(),
-
-                // Tiefling: Darkvision, Fiendish Legacy, Presence, Fire Resistance
-                // +2 CHA, +1 INT
-                RaceEntity.builder()
-                        .name("Tiefling")
-                        .raceAttributes(getAttributeSet("Darkvision", "Fiendish Legacy", "Presence", "Fire Resistance"))
-                        .abilityBonus(Map.of(AbilityTypeEnum.CHARISMA, 2, AbilityTypeEnum.INTELLIGENCE, 1))
-                        .custom(false)
-                        .build(),
-
-                // Dhampir: Darkvision, Vampiric Bite, Damage Resistance
-                // No fixed ability bonuses (flexible ASI)
-                RaceEntity.builder()
-                        .name("Dhampir")
-                        .raceAttributes(getAttributeSet("Darkvision", "Vampiric Bite", "Damage Resistance"))
-                        .custom(false)
-                        .build(),
-
-                // Githyanki: Astral Knowledge, Psychic Resistance, Misty Step
-                // +2 STR, +1 INT
-                RaceEntity.builder()
-                        .name("Githyanki")
-                        .raceAttributes(getAttributeSet("Astral Knowledge", "Psychic Resistance", "Misty Step"))
-                        .abilityBonus(Map.of(AbilityTypeEnum.STRENGTH, 2, AbilityTypeEnum.INTELLIGENCE, 1))
-                        .custom(false)
-                        .build(),
-
-                // Githzerai: Psychic Resistance, Darkvision
-                // +2 WIS, +1 INT
-                RaceEntity.builder()
-                        .name("Githzerai")
-                        .raceAttributes(getAttributeSet("Psychic Resistance", "Darkvision"))
-                        .abilityBonus(Map.of(AbilityTypeEnum.WISDOM, 2, AbilityTypeEnum.INTELLIGENCE, 1))
-                        .custom(false)
-                        .build()
-        );
-    }
-
     // ==================== ALIGNMENT CREATION ====================
     private List<AlignmentEntity> createAlignments() {
         return List.of(
@@ -613,62 +492,11 @@ public class DataInitializer {
         );
     }
 
-    // ==================== SUBRACE CREATION ====================
-    private List<SubraceEntity> createSubraces() {
-        List<SubraceEntity> subraces = new ArrayList<>();
-
-        // Aasimar Subraces
-        subraces.add(SubraceEntity.builder().name("Protector Aasimar").raceId(getRaceId("Aasimar")).build());
-        subraces.add(SubraceEntity.builder().name("Scourge Aasimar").raceId(getRaceId("Aasimar")).build());
-        subraces.add(SubraceEntity.builder().name("Fallen Aasimar").raceId(getRaceId("Aasimar")).build());
-
-        // Dragonborn Subraces
-        subraces.add(SubraceEntity.builder().name("Chromatic Dragonborn").raceId(getRaceId("Dragonborn")).build());
-        subraces.add(SubraceEntity.builder().name("Metallic Dragonborn").raceId(getRaceId("Dragonborn")).build());
-        subraces.add(SubraceEntity.builder().name("Gem Dragonborn").raceId(getRaceId("Dragonborn")).build());
-
-        // Dwarf Subraces
-        subraces.add(SubraceEntity.builder().name("Hill Dwarf").raceId(getRaceId("Dwarf")).build());
-        subraces.add(SubraceEntity.builder().name("Mountain Dwarf").raceId(getRaceId("Dwarf")).build());
-        subraces.add(SubraceEntity.builder().name("Duergar").raceId(getRaceId("Dwarf")).build());
-
-        // Elf Subraces
-        subraces.add(SubraceEntity.builder().name("High Elf").raceId(getRaceId("Elf")).build());
-        subraces.add(SubraceEntity.builder().name("Wood Elf").raceId(getRaceId("Elf")).build());
-        subraces.add(SubraceEntity.builder().name("Dark Elf (Drow)").raceId(getRaceId("Elf")).build());
-        subraces.add(SubraceEntity.builder().name("Eladrin").raceId(getRaceId("Elf")).build());
-        subraces.add(SubraceEntity.builder().name("Sea Elf").raceId(getRaceId("Elf")).build());
-        subraces.add(SubraceEntity.builder().name("Shadar-kai").raceId(getRaceId("Elf")).build());
-
-        // Gnome Subraces
-        subraces.add(SubraceEntity.builder().name("Forest Gnome").raceId(getRaceId("Gnome")).build());
-        subraces.add(SubraceEntity.builder().name("Rock Gnome").raceId(getRaceId("Gnome")).build());
-        subraces.add(SubraceEntity.builder().name("Deep Gnome (Svirfneblin)").raceId(getRaceId("Gnome")).build());
-
-        // Halfling Subraces
-        subraces.add(SubraceEntity.builder().name("Lightfoot Halfling").raceId(getRaceId("Halfling")).build());
-        subraces.add(SubraceEntity.builder().name("Stout Halfling").raceId(getRaceId("Halfling")).build());
-        subraces.add(SubraceEntity.builder().name("Ghostwise Halfling").raceId(getRaceId("Halfling")).build());
-
-        // Tiefling Subraces
-        subraces.add(SubraceEntity.builder().name("Asmodeus Tiefling").raceId(getRaceId("Tiefling")).build());
-        subraces.add(SubraceEntity.builder().name("Baalzebul Tiefling").raceId(getRaceId("Tiefling")).build());
-        subraces.add(SubraceEntity.builder().name("Dispater Tiefling").raceId(getRaceId("Tiefling")).build());
-        subraces.add(SubraceEntity.builder().name("Fierna Tiefling").raceId(getRaceId("Tiefling")).build());
-        subraces.add(SubraceEntity.builder().name("Glasya Tiefling").raceId(getRaceId("Tiefling")).build());
-        subraces.add(SubraceEntity.builder().name("Levistus Tiefling").raceId(getRaceId("Tiefling")).build());
-        subraces.add(SubraceEntity.builder().name("Mammon Tiefling").raceId(getRaceId("Tiefling")).build());
-        subraces.add(SubraceEntity.builder().name("Mephistopheles Tiefling").raceId(getRaceId("Tiefling")).build());
-        subraces.add(SubraceEntity.builder().name("Zariel Tiefling").raceId(getRaceId("Tiefling")).build());
-        subraces.add(SubraceEntity.builder().name("Feral Tiefling").raceId(getRaceId("Tiefling")).build());
-
-        return subraces;
-    }
-
     private Mono<Void> seedSpells() {
         log.info("Seeding spells...");
         List<SpellEntity> spells = spellInitializer.createAllSpells();
         return spellRepository.saveAll(spells)
+                .doOnNext(spell -> spellCache.put(spell.getName(), spell))
                 .then()
                 .doOnSuccess(v -> log.info("Seeded {} spells", spells.size()));
     }
@@ -1251,16 +1079,4 @@ public class DataInitializer {
         );
     }
 
-    // ==================== HELPER METHODS ====================
-    private Set<AttributeEntity> getAttributeSet(String... names) {
-        return Arrays.stream(names)
-                .map(name -> attributeCache.get(name))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-    }
-
-    private String getRaceId(String raceName) {
-        RaceEntity raceEntity = raceCache.get(raceName);
-        return raceEntity != null ? raceEntity.getId() : null;
-    }
 }

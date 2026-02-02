@@ -10,7 +10,7 @@
   </parent>
   <groupId>dm.dracolich</groupId>
   <artifactId>library-api</artifactId>
-  <version>0.0.1</version>
+  <version>0.0.1-LOCALHOST</version>
   <packaging>pom</packaging>
   <name>dracolich-library-api</name>
   <description>dracolich-library-api</description>
@@ -32,7 +32,7 @@
   </distributionManagement>
   <properties>
     <java.version>25</java.version>
-    <revision>0.0.1</revision>
+    <revision>0.0.1-LOCALHOST</revision>
   </properties>
   <dependencies>
     <dependency>

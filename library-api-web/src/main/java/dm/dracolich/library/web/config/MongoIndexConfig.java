@@ -48,8 +48,8 @@ public class MongoIndexConfig {
         // Unique index on subrace name
         createIndexSafe(SubraceEntity.class, new Index().on("name", Sort.Direction.ASC).unique(), "subraces.name");
 
-        // Index on subrace raceId for lookups
-        createIndexSafe(SubraceEntity.class, new Index().on("raceId", Sort.Direction.ASC), "subraces.raceId");
+        // Index on subrace raceName for lookups
+        createIndexSafe(SubraceEntity.class, new Index().on("raceName", Sort.Direction.ASC), "subraces.raceName");
 
         // Unique index on spell name
         createIndexSafe(SpellEntity.class, new Index().on("name", Sort.Direction.ASC).unique(), "spells.name");

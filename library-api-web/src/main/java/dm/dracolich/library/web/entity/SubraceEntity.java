@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.List;
+import java.util.Map;
+
 @Document(collection = "subraces")
 @Data
 @Builder
@@ -17,5 +20,6 @@ public class SubraceEntity {
     private String id;
     private String name;
     private String description;
-    private String raceId;
+    private String raceName;
+    private Map<Integer, List<SpellEntity>> cantripsAndSpells;
 }

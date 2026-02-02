@@ -2,22 +2,22 @@ package dm.dracolich.library.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import dm.dracolich.library.dto.enums.AbilityTypeEnum;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.Map;
 
 @Data
-@Getter
-@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class AttributeDto {
-    @JsonIgnore
-    private String id;
+public class SubraceDto {
     private String name;
     private String description;
-    private Map<AbilityTypeEnum, Integer> abilityBonus;
+    private String raceName;
+    private Map<Integer, List<SpellDto>> cantripsAndSpells;
 }

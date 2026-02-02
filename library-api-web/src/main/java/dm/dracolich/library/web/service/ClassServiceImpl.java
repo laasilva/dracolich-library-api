@@ -51,13 +51,13 @@ public class ClassServiceImpl implements ClassService {
 
     @Override
     public Flux<ClassResumedRecord> searchClassesByName(String name) {
-        return repo.findAllByClassNameIgnoreCase(name)
+        return repo.findAllByClassNameContainingIgnoreCase(name)
                 .map(mapper::entityToResumedRecord);
     }
 
     @Override
     public Flux<ClassDto> searchClassesByNameDetailed(String name) {
-        return repo.findAllByClassNameIgnoreCase(name)
+        return repo.findAllByClassNameContainingIgnoreCase(name)
                 .flatMap(this::enrichWithSubclasses);
     }
 
