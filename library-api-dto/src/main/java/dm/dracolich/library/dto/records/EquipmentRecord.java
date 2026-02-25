@@ -11,6 +11,7 @@ import java.util.Set;
 public record EquipmentRecord(String id,
                               String name,
                               String description,
+                              String image,
                               EquipmentCategoryEnum equipmentCategory,
                               Integer weight,
                               Map<CoinEnum, Integer> price,

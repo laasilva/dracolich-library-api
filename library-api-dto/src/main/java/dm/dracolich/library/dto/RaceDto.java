@@ -19,6 +19,7 @@ import java.util.Set;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RaceDto {
     private String name;
+    private String image;
     private SizeEnum size;
     private Integer speed;
     private Set<AttributeDto> raceAttributes;

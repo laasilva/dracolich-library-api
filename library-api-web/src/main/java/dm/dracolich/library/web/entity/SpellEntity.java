@@ -21,12 +21,13 @@ public class SpellEntity {
     private String id;
     private String name;
     private String description;
+    private String image;
     private SchoolTypeEnum schoolType;
     private String[] actionDescription; // if spell doesn't have damage types or values to be attributed, but has precise description, ex: "Spell: Alarm = Audible Alarm. The alarm produces the sound of a handbell for 10 seconds within 60 feet of the warded area. Mental Alarm. You are alerted by a mental ping if you are within 1 mile of the warded area. This ping awakens you if you’re asleep."
     private Integer minSlotLevel;
-    private Integer castingTime; // in actions, 0 if instantaneous
+    private String castingTime;
     private Integer range; // in feet, 0 if self or touch
-    private Integer duration; // in hours, 0 if instantaneous
+    private String duration;
     private SpellTypeEnum spellType;
     private AttackTypeEnum attackType;
     private AbilityTypeEnum save;

@@ -22,6 +22,7 @@ public class RaceEntity {
     @Id
     private String id;
     private String name;
+    private String image;
     private SizeEnum size;
     private Integer speed;
     private Set<AttributeEntity> raceAttributes;

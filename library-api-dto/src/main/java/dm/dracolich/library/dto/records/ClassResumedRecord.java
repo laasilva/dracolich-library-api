@@ -4,6 +4,7 @@ import dm.dracolich.library.dto.enums.*;
 
 public record ClassResumedRecord(String name,
                                  String description,
+                                 String image,
                                  DiceTypeEnum hitDice,
                                  boolean custom) {
 }

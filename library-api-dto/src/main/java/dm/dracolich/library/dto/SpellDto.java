@@ -19,15 +19,15 @@ import java.util.Set;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SpellDto {
-    @JsonIgnore
     private String id;
     private String name;
     private String description;
+    private String image;
     private SchoolTypeEnum schoolType;
     private Integer minSlotLevel;
-    private Integer castingTime;
+    private String castingTime;
     private Integer range;
-    private Integer duration;
+    private String duration;
     private SpellTypeEnum spellType;
     private AbilityTypeEnum save;
     private Set<DamageTypeEnum> damageTypes;

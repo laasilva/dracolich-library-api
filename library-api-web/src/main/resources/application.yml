@@ -15,6 +15,11 @@ spring:
 server:
   port: ${PORT:8080}
 
+cloudinary:
+  cloud-name: ${CLOUDINARY_CLOUD_NAME:dracolich}
+  api-key: ${CLOUDINARY_API_KEY:738686976318662}
+  api-secret: ${CLOUDINARY_API_SECRET:sgCZL8xEVx6ZXlVuRwQhsCt6res}
+
 logging:
   level:
     dm.dracolich: DEBUG

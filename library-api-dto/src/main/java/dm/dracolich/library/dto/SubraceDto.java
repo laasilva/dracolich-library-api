@@ -18,6 +18,7 @@ import java.util.Map;
 public class SubraceDto {
     private String name;
     private String description;
+    private String image;
     private String raceName;
     private Map<Integer, List<SpellDto>> cantripsAndSpells;
 }

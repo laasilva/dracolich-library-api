@@ -10,5 +10,6 @@ import reactor.core.publisher.Mono;
 @Repository
 public interface SpellRepository extends ReactiveMongoRepository<SpellEntity, String>, ReactiveQueryByExampleExecutor<SpellEntity> {
     Mono<SpellEntity> findByName(String name);
+    Mono<SpellEntity> findByNameIgnoreCase(String name);
     Flux<SpellEntity> findByNameContainingIgnoreCase(String name);
 }

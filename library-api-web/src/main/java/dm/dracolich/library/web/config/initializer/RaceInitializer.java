@@ -4,6 +4,7 @@ import dm.dracolich.library.dto.enums.SizeEnum;
 import dm.dracolich.library.web.entity.RaceEntity;
 import dm.dracolich.library.web.entity.SpellEntity;
 import dm.dracolich.library.web.entity.SubraceEntity;
+import lombok.Setter;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -13,14 +14,11 @@ import java.util.Objects;
 
 import static dm.dracolich.library.dto.enums.AbilityTypeEnum.*;
 
+@Setter
 @Component
 public class RaceInitializer {
-    private Map<String, SpellEntity> spellCache;
-
     // Set the spell cache before creating races/subraces
-    public void setSpellCache(Map<String, SpellEntity> spellCache) {
-        this.spellCache = spellCache;
-    }
+    private Map<String, SpellEntity> spellCache;
 
     // Helper method to safely get a spell by name from the cache
     private SpellEntity getSpell(String name) {

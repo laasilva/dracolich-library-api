@@ -23,6 +23,7 @@ public class EquipmentEntity {
     private String id;
     private String name;
     private String description;
+    private String image;
     private EquipmentCategoryEnum equipmentCategory;
     private Integer weight;
     private Map<CoinEnum, Integer> price;

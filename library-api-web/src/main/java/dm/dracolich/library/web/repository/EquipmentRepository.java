@@ -10,5 +10,6 @@ import reactor.core.publisher.Mono;
 @Repository
 public interface EquipmentRepository extends ReactiveMongoRepository<EquipmentEntity, String> {
     Mono<EquipmentEntity> findByName(String name);
+    Mono<EquipmentEntity> findByNameIgnoreCase(String name);
     Flux<EquipmentEntity> findByEquipmentCategory(EquipmentCategoryEnum category);
 }

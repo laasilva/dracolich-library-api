@@ -20,6 +20,7 @@ public class SubraceEntity {
     private String id;
     private String name;
     private String description;
+    private String image;
     private String raceName;
     private Map<Integer, List<SpellEntity>> cantripsAndSpells;
 }

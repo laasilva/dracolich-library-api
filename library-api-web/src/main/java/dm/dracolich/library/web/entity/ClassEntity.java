@@ -25,7 +25,8 @@ public class ClassEntity {
     @Indexed(unique = true)
     private String name;
     private String description;
-    private Map<Integer, Set<SkillsEnum>> skillProficiencies; // and how many can be choosen
+    private String image;
+    private Map<Integer, Set<SkillsEnum>> skillProficiencies; // and how many can be chosen
     private DiceTypeEnum hitDice;
     private Set<AbilityTypeEnum> savingThrows;
     private Set<ArmorTypeEnum> armorTraining;

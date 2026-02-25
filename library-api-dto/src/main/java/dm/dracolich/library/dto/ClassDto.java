@@ -18,6 +18,7 @@ public class ClassDto {
     private String id;
     private String name;
     private String description;
+    private String image;
     private Set<SubclassDto> subclasses;
     private Map<Integer, Set<SkillsEnum>> skillProficiencies;
     private DiceTypeEnum hitDice;
