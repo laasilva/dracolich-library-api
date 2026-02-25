@@ -196,7 +196,7 @@ public class DataInitializer {
         attributes.add(AttributeEntity.builder()
                 .name("Dwarven Toughness")
                 .description("Your hit point maximum increases by 1, and it increases by 1 every time you gain a level.")
-                .abilityBonus(Map.of(AbilityTypeEnum.CONSTITUTION, 1))
+                .abilityBonus(Map.of(AbilityTypeEnum.CON, 1))
                 .build());
         attributes.add(AttributeEntity.builder()
                 .name("Stonecunning")
@@ -237,7 +237,7 @@ public class DataInitializer {
         attributes.add(AttributeEntity.builder()
                 .name("Powerful Build")
                 .description("You count as one size larger when determining your carrying capacity and the weight you can push, drag, or lift.")
-                .abilityBonus(Map.of(AbilityTypeEnum.STRENGTH, 1))
+                .abilityBonus(Map.of(AbilityTypeEnum.STR, 1))
                 .build());
         attributes.add(AttributeEntity.builder()
                 .name("Brave")
@@ -306,7 +306,7 @@ public class DataInitializer {
         attributes.add(AttributeEntity.builder()
                 .name("Astral Knowledge")
                 .description("You can mystically access a reservoir of experiences of entities connected to the Astral Plane. You gain proficiency in one skill of your choice.")
-                .abilityBonus(Map.of(AbilityTypeEnum.INTELLIGENCE, 1))
+                .abilityBonus(Map.of(AbilityTypeEnum.INT, 1))
                 .build());
         attributes.add(AttributeEntity.builder()
                 .name("Psychic Resistance")

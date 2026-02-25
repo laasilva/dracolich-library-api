@@ -42,7 +42,7 @@ public class ClassInitializer {
                 .description("Barbarians are powerful warriors whose strength comes from their rage. Able to use their anger as a weapon. The subclass represents different paths they walk, which teaches them special ways to use their anger.")
                 .skillProficiencies(Map.of(2, Set.of(ANIMAL_HANDLING, ATHLETICS, INTIMIDATION, NATURE, PERCEPTION, SURVIVAL)))
                 .hitDice(DiceTypeEnum.D12)
-                .savingThrows(Set.of(STRENGTH, CONSTITUTION))
+                .savingThrows(Set.of(STR, CON))
                 .armorTraining(Set.of(LIGHT, MEDIUM, SHIELDS))
                 .weaponTraining(Set.of(SIMPLE, MARTIAL))
                 .startingEquipmentA(Set.of(
@@ -112,7 +112,7 @@ public class ClassInitializer {
                 .description("A poet, a singer, a storyteller. There are those that seek to bring wonder to the world, and their magic comes from their emotions from the stories they tell and the songs they sing. Bards have different colleges that they follow to hone their skills in magic.")
                 .skillProficiencies(Map.of(3, Set.of(ACROBATICS, ANIMAL_HANDLING, ARCANA, ATHLETICS, DECEPTION, HISTORY, INSIGHT, INTIMIDATION, INVESTIGATION, MEDICINE, NATURE, PERCEPTION, PERFORMANCE, PERSUASION, RELIGION, SLEIGHT_OF_HAND, STEALTH, SURVIVAL)))
                 .hitDice(DiceTypeEnum.D8)
-                .savingThrows(Set.of(DEXTERITY, CHARISMA))
+                .savingThrows(Set.of(DEX, CHA))
                 .weaponTraining(Set.of(SIMPLE))
                 .armorTraining(Set.of(LIGHT))
                 .startingEquipmentA(Set.of(
@@ -183,7 +183,7 @@ public class ClassInitializer {
                 .description("Ideas are not just a simple blueprint for a machine or an urge to buy new farming equipment. Ideas are immortal things that can topple empires and bring justice to those that threaten others. Ideas are some of the most powerful forces in the universe. All it needs is a champion, and clerics are those champions. Usually following a pantheon or a god/goddess, they devote their lives to serving that idea.")
                 .skillProficiencies(Map.of(2, Set.of(HISTORY, INSIGHT, MEDICINE, PERSUASION, RELIGION)))
                 .hitDice(DiceTypeEnum.D8)
-                .savingThrows(Set.of(WISDOM, CHARISMA))
+                .savingThrows(Set.of(WIS, CHA))
                 .armorTraining(Set.of(LIGHT, MEDIUM, SHIELDS))
                 .weaponTraining(Set.of(SIMPLE))
                 .startingEquipmentA(Set.of(
@@ -256,7 +256,7 @@ public class ClassInitializer {
                 .description("Druids are protectors of nature. They are the embodiment of it's wrath and it's beauty. They have the ability to shapeshift into creatures and special skills, based on which circle they follow which is a further representation of different parts of nature.")
                 .skillProficiencies(Map.of(2, Set.of(ARCANA, ANIMAL_HANDLING, INSIGHT, MEDICINE, NATURE, PERCEPTION, RELIGION, SURVIVAL)))
                 .hitDice(DiceTypeEnum.D8)
-                .savingThrows(Set.of(INTELLIGENCE, WISDOM))
+                .savingThrows(Set.of(INT, WIS))
                 .armorTraining(Set.of(LIGHT, MEDIUM, SHIELDS))
                 .weaponTraining(Set.of(SIMPLE))
                 .startingEquipmentA(Set.of(
@@ -327,7 +327,7 @@ public class ClassInitializer {
                 .description("Swordsman ship, spears, shields, bows and crossbows. All these bring about images of fighters. Warriors who hone their combative ability to a deadly skill that rivals none. Some use magic to enhance their ability, while others crush magic in favor of pure muscle or acrobatic skills.")
                 .skillProficiencies(Map.of(2, Set.of(ACROBATICS, ANIMAL_HANDLING, ATHLETICS, HISTORY, INSIGHT, INTIMIDATION, PERCEPTION, SURVIVAL)))
                 .hitDice(DiceTypeEnum.D10)
-                .savingThrows(Set.of(STRENGTH, CONSTITUTION))
+                .savingThrows(Set.of(STR, CON))
                 .armorTraining(Set.of(LIGHT, MEDIUM, HEAVY, SHIELDS))
                 .weaponTraining(Set.of(SIMPLE, MARTIAL))
                 .startingEquipmentA(Set.of(
@@ -408,7 +408,7 @@ public class ClassInitializer {
                 .description("Kung Fu, Karate, Drunken Fighting, Dr. Strange, ect. All of these are what the D&D Monks train in. Whether it's using your fist, spirit, ki or weapons that are nothing but an extension of your will. Monks can deliver a storm of powerful melee attacks.")
                 .skillProficiencies(Map.of(2, Set.of(ACROBATICS, ATHLETICS, HISTORY, INSIGHT, RELIGION, STEALTH)))
                 .hitDice(DiceTypeEnum.D8)
-                .savingThrows(Set.of(STRENGTH, DEXTERITY))
+                .savingThrows(Set.of(STR, DEX))
                 .armorTraining(Set.of())
                 .weaponTraining(Set.of(SIMPLE))
                 .startingEquipmentA(Set.of(
@@ -477,7 +477,7 @@ public class ClassInitializer {
                 .description("Paladins, much like clerics, hold up ideas. However, they serve tenants with a multitude of ideas. Some of joy, others of light and conquest. Paladin holds an Oath which is the representation of said ideas.")
                 .skillProficiencies(Map.of(2, Set.of(ATHLETICS, INSIGHT, INTIMIDATION, MEDICINE, PERSUASION, RELIGION)))
                 .hitDice(DiceTypeEnum.D10)
-                .savingThrows(Set.of(WISDOM, CHARISMA))
+                .savingThrows(Set.of(WIS, CHA))
                 .armorTraining(Set.of(LIGHT, MEDIUM, HEAVY, SHIELDS))
                 .weaponTraining(Set.of(SIMPLE, MARTIAL))
                 .startingEquipmentA(Set.of(
@@ -549,7 +549,7 @@ public class ClassInitializer {
                 .description("Rangers are those that wander and live within the wild. Their skill to survive in harsh nature places is bested by none. Many rangers take on a role, usually in various ways to hunt special types of monsters.")
                 .skillProficiencies(Map.of(3, Set.of(ANIMAL_HANDLING, ATHLETICS, INSIGHT, INVESTIGATION, NATURE, PERCEPTION, STEALTH, SURVIVAL)))
                 .hitDice(DiceTypeEnum.D10)
-                .savingThrows(Set.of(STRENGTH, DEXTERITY))
+                .savingThrows(Set.of(STR, DEX))
                 .armorTraining(Set.of(LIGHT, MEDIUM, SHIELDS))
                 .weaponTraining(Set.of(SIMPLE, MARTIAL))
                 .startingEquipmentA(Set.of(
@@ -624,7 +624,7 @@ public class ClassInitializer {
                 .skillProficiencies(Map.of(4, Set.of(ACROBATICS, ATHLETICS, DECEPTION, INSIGHT, INTIMIDATION,
                         INVESTIGATION, PERCEPTION, PERFORMANCE, PERSUASION, SLEIGHT_OF_HAND, STEALTH)))
                 .hitDice(DiceTypeEnum.D8)
-                .savingThrows(Set.of(DEXTERITY, INTELLIGENCE))
+                .savingThrows(Set.of(DEX, INT))
                 .armorTraining(Set.of(LIGHT))
                 .weaponTraining(Set.of(SIMPLE))
                 .startingEquipmentA(Set.of(
@@ -699,7 +699,7 @@ public class ClassInitializer {
                 .skillProficiencies(Map.of(2, Set.of(ARCANA, DECEPTION, INSIGHT,
                         INTIMIDATION, PERSUASION, RELIGION)))
                 .hitDice(DiceTypeEnum.D6)
-                .savingThrows(Set.of(CONSTITUTION, CHARISMA))
+                .savingThrows(Set.of(CON, CHA))
                 .armorTraining(Set.of())
                 .weaponTraining(Set.of(SIMPLE))
                 .startingEquipmentA(Set.of(
@@ -770,7 +770,7 @@ public class ClassInitializer {
                 .skillProficiencies(Map.of(2, Set.of(ARCANA, DECEPTION, HISTORY,
                         INTIMIDATION, INVESTIGATION, NATURE, RELIGION)))
                 .hitDice(DiceTypeEnum.D8)
-                .savingThrows(Set.of(WISDOM, CHARISMA))
+                .savingThrows(Set.of(WIS, CHA))
                 .armorTraining(Set.of(LIGHT))
                 .weaponTraining(Set.of(SIMPLE))
                 .startingEquipmentA(Set.of(
@@ -842,7 +842,7 @@ public class ClassInitializer {
                 .skillProficiencies(Map.of(2, Set.of(ARCANA, HISTORY, INSIGHT,
                         INVESTIGATION, MEDICINE, RELIGION)))
                 .hitDice(DiceTypeEnum.D6)
-                .savingThrows(Set.of(INTELLIGENCE, WISDOM))
+                .savingThrows(Set.of(INT, WIS))
                 .armorTraining(Set.of())
                 .weaponTraining(Set.of(SIMPLE))
                 .startingEquipmentA(Set.of(

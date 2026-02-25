@@ -367,7 +367,7 @@ public class RaceInitializer {
                 .name("Aasimar")
                 .size(SizeEnum.MEDIUM)
                 .speed(30)
-                .abilityBonus(Map.of(CHARISMA, 2, WISDOM, 1))
+                .abilityBonus(Map.of(CHA, 2, WIS, 1))
                 .cantripsAndSpells(Map.of(
                         1, List.of(getSpell("Light")),
                         3, List.of(getSpell("Lesser Restoration"))))
@@ -381,7 +381,7 @@ public class RaceInitializer {
                 .name("Dragonborn")
                 .size(SizeEnum.MEDIUM)
                 .speed(30)
-                .abilityBonus(Map.of(STRENGTH, 2, CHARISMA, 1))
+                .abilityBonus(Map.of(STR, 2, CHA, 1))
                 .custom(false)
                 .build();
     }
@@ -392,7 +392,7 @@ public class RaceInitializer {
                 .name("Dwarf")
                 .size(SizeEnum.MEDIUM)
                 .speed(25)
-                .abilityBonus(Map.of(CONSTITUTION, 2))
+                .abilityBonus(Map.of(CON, 2))
                 .custom(false)
                 .build();
     }
@@ -405,7 +405,7 @@ public class RaceInitializer {
                 .size(SizeEnum.MEDIUM)
                 .speed(30)
                 .cantripsAndSpells(Map.of(1, List.of(getSpell("Darkvision"))))
-                .abilityBonus(Map.of(DEXTERITY, 2))
+                .abilityBonus(Map.of(DEX, 2))
                 .custom(false)
                 .build();
     }
@@ -416,7 +416,7 @@ public class RaceInitializer {
                 .name("Gnome")
                 .size(SizeEnum.SMALL)
                 .speed(25)
-                .abilityBonus(Map.of(INTELLIGENCE, 2))
+                .abilityBonus(Map.of(INT, 2))
                 .custom(false)
                 .build();
     }
@@ -427,7 +427,7 @@ public class RaceInitializer {
                 .name("Goliath")
                 .size(SizeEnum.MEDIUM)
                 .speed(35)
-                .abilityBonus(Map.of(STRENGTH, 2, CONSTITUTION, 1))
+                .abilityBonus(Map.of(STR, 2, CON, 1))
                 .custom(false)
                 .build();
     }
@@ -438,7 +438,7 @@ public class RaceInitializer {
                 .name("Halfling")
                 .size(SizeEnum.SMALL)
                 .speed(25)
-                .abilityBonus(Map.of(DEXTERITY, 2))
+                .abilityBonus(Map.of(DEX, 2))
                 .custom(false)
                 .build();
     }
@@ -450,12 +450,12 @@ public class RaceInitializer {
                 .size(SizeEnum.MEDIUM)
                 .speed(30)
                 .abilityBonus(Map.of(
-                        STRENGTH, 1,
-                        DEXTERITY, 1,
-                        CONSTITUTION, 1,
-                        INTELLIGENCE, 1,
-                        WISDOM, 1,
-                        CHARISMA, 1
+                        STR, 1,
+                        DEX, 1,
+                        CON, 1,
+                        INT, 1,
+                        WIS, 1,
+                        CHA, 1
                 ))
                 .custom(false)
                 .build();
@@ -467,7 +467,7 @@ public class RaceInitializer {
                 .name("Orc")
                 .size(SizeEnum.MEDIUM)
                 .speed(30)
-                .abilityBonus(Map.of(STRENGTH, 2, CONSTITUTION, 1))
+                .abilityBonus(Map.of(STR, 2, CON, 1))
                 .custom(false)
                 .build();
     }
@@ -478,7 +478,7 @@ public class RaceInitializer {
                 .name("Tiefling")
                 .size(SizeEnum.MEDIUM)
                 .speed(30)
-                .abilityBonus(Map.of(CHARISMA, 2, INTELLIGENCE, 1))
+                .abilityBonus(Map.of(CHA, 2, INT, 1))
                 .custom(false)
                 .build();
     }
@@ -489,7 +489,7 @@ public class RaceInitializer {
                 .name("Half-Elf")
                 .size(SizeEnum.MEDIUM)
                 .speed(30)
-                .abilityBonus(Map.of(CHARISMA, 2)) // +1 to two other abilities of choice
+                .abilityBonus(Map.of(CHA, 2)) // +1 to two other abilities of choice
                 .custom(false)
                 .build();
     }
@@ -500,7 +500,7 @@ public class RaceInitializer {
                 .name("Half-Orc")
                 .size(SizeEnum.MEDIUM)
                 .speed(30)
-                .abilityBonus(Map.of(STRENGTH, 2, CONSTITUTION, 1))
+                .abilityBonus(Map.of(STR, 2, CON, 1))
                 .custom(false)
                 .build();
     }
@@ -511,7 +511,7 @@ public class RaceInitializer {
                 .name("Tabaxi")
                 .size(SizeEnum.MEDIUM)
                 .speed(30)
-                .abilityBonus(Map.of(DEXTERITY, 2, CHARISMA, 1))
+                .abilityBonus(Map.of(DEX, 2, CHA, 1))
                 .custom(false)
                 .build();
     }
@@ -522,7 +522,7 @@ public class RaceInitializer {
                 .name("Firbolg")
                 .size(SizeEnum.MEDIUM)
                 .speed(30)
-                .abilityBonus(Map.of(WISDOM, 2, STRENGTH, 1))
+                .abilityBonus(Map.of(WIS, 2, STR, 1))
                 .cantripsAndSpells(Map.of(
                         1, List.of(getSpell("Detect Magic"), getSpell("Disguise Self"))))
                 .custom(false)
@@ -535,7 +535,7 @@ public class RaceInitializer {
                 .name("Kenku")
                 .size(SizeEnum.MEDIUM)
                 .speed(30)
-                .abilityBonus(Map.of(DEXTERITY, 2, WISDOM, 1))
+                .abilityBonus(Map.of(DEX, 2, WIS, 1))
                 .custom(false)
                 .build();
     }
@@ -546,7 +546,7 @@ public class RaceInitializer {
                 .name("Lizardfolk")
                 .size(SizeEnum.MEDIUM)
                 .speed(30)
-                .abilityBonus(Map.of(CONSTITUTION, 2, WISDOM, 1))
+                .abilityBonus(Map.of(CON, 2, WIS, 1))
                 .custom(false)
                 .build();
     }
@@ -557,7 +557,7 @@ public class RaceInitializer {
                 .name("Triton")
                 .size(SizeEnum.MEDIUM)
                 .speed(30)
-                .abilityBonus(Map.of(STRENGTH, 1, CONSTITUTION, 1, CHARISMA, 1))
+                .abilityBonus(Map.of(STR, 1, CON, 1, CHA, 1))
                 .cantripsAndSpells(Map.of(
                         1, List.of(getSpell("Fog Cloud")),
                         3, List.of(getSpell("Gust of Wind")),
@@ -572,7 +572,7 @@ public class RaceInitializer {
                 .name("Goblin")
                 .size(SizeEnum.SMALL)
                 .speed(30)
-                .abilityBonus(Map.of(DEXTERITY, 2, CONSTITUTION, 1))
+                .abilityBonus(Map.of(DEX, 2, CON, 1))
                 .custom(false)
                 .build();
     }
@@ -583,7 +583,7 @@ public class RaceInitializer {
                 .name("Bugbear")
                 .size(SizeEnum.MEDIUM)
                 .speed(30)
-                .abilityBonus(Map.of(STRENGTH, 2, DEXTERITY, 1))
+                .abilityBonus(Map.of(STR, 2, DEX, 1))
                 .custom(false)
                 .build();
     }
@@ -594,7 +594,7 @@ public class RaceInitializer {
                 .name("Hobgoblin")
                 .size(SizeEnum.MEDIUM)
                 .speed(30)
-                .abilityBonus(Map.of(CONSTITUTION, 2, INTELLIGENCE, 1))
+                .abilityBonus(Map.of(CON, 2, INT, 1))
                 .custom(false)
                 .build();
     }
@@ -605,7 +605,7 @@ public class RaceInitializer {
                 .name("Kobold")
                 .size(SizeEnum.SMALL)
                 .speed(30)
-                .abilityBonus(Map.of(DEXTERITY, 2))
+                .abilityBonus(Map.of(DEX, 2))
                 .custom(false)
                 .build();
     }
@@ -616,7 +616,7 @@ public class RaceInitializer {
                 .name("Yuan-Ti")
                 .size(SizeEnum.MEDIUM)
                 .speed(30)
-                .abilityBonus(Map.of(CHARISMA, 2, INTELLIGENCE, 1))
+                .abilityBonus(Map.of(CHA, 2, INT, 1))
                 .cantripsAndSpells(Map.of(
                         1, List.of(getSpell("Poison Spray")),
                         3, List.of(getSpell("Animal Friendship")),
@@ -631,7 +631,7 @@ public class RaceInitializer {
                 .name("Githyanki")
                 .size(SizeEnum.MEDIUM)
                 .speed(30)
-                .abilityBonus(Map.of(STRENGTH, 2, INTELLIGENCE, 1))
+                .abilityBonus(Map.of(STR, 2, INT, 1))
                 .cantripsAndSpells(Map.of(
                         1, List.of(getSpell("Mage Hand")),
                         3, List.of(getSpell("Jump")),
@@ -646,7 +646,7 @@ public class RaceInitializer {
                 .name("Githzerai")
                 .size(SizeEnum.MEDIUM)
                 .speed(30)
-                .abilityBonus(Map.of(WISDOM, 2, INTELLIGENCE, 1))
+                .abilityBonus(Map.of(WIS, 2, INT, 1))
                 .cantripsAndSpells(Map.of(
                         1, List.of(getSpell("Mage Hand")),
                         3, List.of(getSpell("Shield")),

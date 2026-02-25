@@ -17,8 +17,8 @@ server:
 
 cloudinary:
   cloud-name: ${CLOUDINARY_CLOUD_NAME:dracolich}
-  api-key: ${CLOUDINARY_API_KEY:738686976318662}
-  api-secret: ${CLOUDINARY_API_SECRET:sgCZL8xEVx6ZXlVuRwQhsCt6res}
+  api-key: ${CLOUDINARY_API_KEY:xxxxxxxxxxxxx}
+  api-secret: ${CLOUDINARY_API_SECRET:xxxxxxxxxxxxxx}
 
 logging:
   level:
