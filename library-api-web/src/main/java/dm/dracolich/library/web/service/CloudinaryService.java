@@ -2,9 +2,9 @@ package dm.dracolich.library.web.service;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
-import dm.dracolich.library.dto.error.ApiError;
-import dm.dracolich.library.dto.error.ErrorSeverity;
-import dm.dracolich.library.dto.exception.ResponseException;
+import dm.dracolich.forge.exception.ResponseException;
+import dm.dracolich.forge.error.ApiError;
+import dm.dracolich.forge.error.ErrorSeverity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -19,8 +19,8 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
-import static dm.dracolich.library.dto.error.ErrorCodes.DMD010;
-import static dm.dracolich.library.dto.error.ErrorCodes.DMD011;
+import static dm.dracolich.forge.error.ErrorCodes.DMD010;
+import static dm.dracolich.forge.error.ErrorCodes.DMD011;
 import static java.lang.String.format;
 
 @Service

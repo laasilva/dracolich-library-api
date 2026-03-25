@@ -1,6 +1,7 @@
 package dm.dracolich.library.web.repository;
 
 import dm.dracolich.library.web.entity.SpellEntity;
+import dm.dracolich.library.web.repository.custom.SpellCustomRepository;
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import org.springframework.data.repository.query.ReactiveQueryByExampleExecutor;
 import org.springframework.stereotype.Repository;
@@ -8,7 +9,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Repository
-public interface SpellRepository extends ReactiveMongoRepository<SpellEntity, String>, ReactiveQueryByExampleExecutor<SpellEntity> {
+public interface SpellRepository extends ReactiveMongoRepository<SpellEntity, String>, ReactiveQueryByExampleExecutor<SpellEntity>, SpellCustomRepository {
     Mono<SpellEntity> findByName(String name);
     Mono<SpellEntity> findByNameIgnoreCase(String name);
     Flux<SpellEntity> findByNameContainingIgnoreCase(String name);

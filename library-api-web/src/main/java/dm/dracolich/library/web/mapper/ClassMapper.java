@@ -10,4 +10,5 @@ import org.mapstruct.Mapper;
 public interface ClassMapper {
     ClassDto entityToDto(ClassEntity entity);
     ClassResumedRecord entityToResumedRecord(ClassEntity entity);
+    ClassEntity dtoToEntity(ClassDto dto);
 }

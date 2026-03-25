@@ -120,7 +120,7 @@ jobs:
                 <repositories>
                   <repository>
                     <id>github</id>
-                    <url>https://maven.pkg.github.com/laasilva/dracolich-forge</url>
+                    <url>https://maven.pkg.github.com/laasilva/dracolich-library-api</url>
                     <snapshots>
                       <enabled>true</enabled>
                     </snapshots>
